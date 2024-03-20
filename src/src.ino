@@ -2,6 +2,7 @@
 #include <PA12.h>
 #include <Adafruit_INA260.h>
 #include <Adafruit_MCP4725.h>
+#include "types.h"
 
 
 #define LA_ID_NUM 0 // ID number of the linear actuator
@@ -19,6 +20,7 @@ uint16_t dacValue = 4090; // 0 - 4095
 
 // Timers
 unsigned long printTimer = 0;
+unsigned long printTimerInterval = 1000;
 
 
 void setup () {
@@ -49,7 +51,7 @@ void setup () {
     }
     
     //DAC
-    dac.begin(0x64); //0x64
+    dac.begin(0x64);
     delay(10);
     dac.setVoltage(dacValue, false);
     Serial.println("DAC ready");
@@ -62,8 +64,14 @@ void setup () {
 }
 
 void loop () {
+    if (Serial.available() > 0) {
+        String serialInput = Serial.readStringUntil('\n');
+        Serial.flush();
+        ProcessCommand(serialInput);
+    }
+
     if (printTimer < millis()) {
-        printTimer += 100;
+        printTimer += printTimerInterval;
         PrintOutput();
     }
 }
@@ -82,4 +90,34 @@ void PrintOutput () {
     Serial.println("Power: \t\t" + PadString(String(ina260.readPower())));
     Serial.println("Voltage: \t" + PadString(String(ina260.readBusVoltage())));
     Serial.println("LA Position: \t" + PadString(String(myServo.presentPosition(LA_ID_NUM))));
+}
+
+Command getCommand (String command) {
+    if (command == "setDac") {
+        return Command::SETDAC;
+    } else if (command == "setLA") {
+        return Command::SETLA;
+    } else {
+        return Command::INVALID;
+    }
+}
+
+void ProcessCommand (String serialInput) {
+    Command command = getCommand(serialInput.substring(0, serialInput.indexOf(" ")));
+    String args = serialInput.substring(serialInput.indexOf(" ") + 1);
+
+    switch (command) {
+        case Command::INVALID:
+            Serial.println("Invalid command");
+            break;
+        case Command::SETDAC:
+            dacValue = args.toInt();
+            dac.setVoltage(dacValue, false);
+            Serial.println("DAC set to " + String(dacValue));
+            break;
+        case Command::SETLA:
+            myServo.goalPosition(LA_ID_NUM, args.toInt());
+            Serial.println("Linear Actuator set to " + String(dacValue));
+            break;
+    }
 }

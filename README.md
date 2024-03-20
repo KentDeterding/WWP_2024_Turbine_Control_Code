@@ -21,10 +21,10 @@ Pin Num = D20
 ## I2C
 
 ### Ina 260
-i2c address = 0x40 = 64
+i2c address = 0x40
 
 ### DAC (MCP4725)
-i2c address = 0x60 = 96
+i2c address = 0x64
 
 ### Turbine
 Open for future connections (pitot tube, accelerometer)

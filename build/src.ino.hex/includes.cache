@@ -1,0 +1,112 @@
+[
+  {
+    "Sourcefile": null,
+    "Include": "",
+    "Includepath": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\cores\\teensy4"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "Wire.h",
+    "Includepath": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\Wire"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "PA12.h",
+    "Includepath": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\PA12_Arduino"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "SoftwareSerial.h",
+    "Includepath": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\SoftwareSerial"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "Adafruit_INA260.h",
+    "Includepath": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_INA260_Library"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "Adafruit_I2CDevice.h",
+    "Includepath": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "SPI.h",
+    "Includepath": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\SPI"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "Adafruit_MCP4725.h",
+    "Includepath": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_MCP4725"
+  },
+  {
+    "Sourcefile": "c:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\sketch\\src.ino.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\Wire\\Wire.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\Wire\\WireIMXRT.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\Wire\\WireKinetis.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\Wire\\utility\\twi.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\PA12_Arduino\\PA12.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\PA12_Arduino\\utility\\IR_Protocol.c",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\SoftwareSerial\\SoftwareSerial.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_INA260_Library\\Adafruit_INA260.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_BusIO_Register.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\SPI\\SPI.cpp",
+    "Include": "",
+    "Includepath": null
+  },
+  {
+    "Sourcefile": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_MCP4725\\Adafruit_MCP4725.cpp",
+    "Include": "",
+    "Includepath": null
+  }
+]
