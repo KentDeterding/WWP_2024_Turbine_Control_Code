@@ -15,7 +15,7 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 
 // DAC
 Adafruit_MCP4725 dac;
-int dacValue = 0;
+uint16_t dacValue = 4090; // 0 - 4095
 
 // Timers
 unsigned long printTimer = 0;
@@ -39,9 +39,9 @@ void setup () {
     }
 
     //INA260
-    ina260.begin();
+    ina260.begin(0x40);
     delay(10);
-    if (ina260.readPower()) {
+    if (ina260.conversionReady()) {
         Serial.println("INA260 ready");
     } else {
         Serial.println("INA260 error");
@@ -49,7 +49,7 @@ void setup () {
     }
     
     //DAC
-    dac.begin(0x60);
+    dac.begin(0x64); //0x64
     delay(10);
     dac.setVoltage(dacValue, false);
     Serial.println("DAC ready");
@@ -76,8 +76,10 @@ String PadString (String str) {
 }
 
 void PrintOutput () {
-    Serial.println("Time: \t" + PadString(String(millis())));
-    Serial.println("Dac: \t" + PadString(String(dacValue)));
-    Serial.println("Power: \t" + PadString(String(ina260.readPower())));
+    Serial.println("");
+    Serial.println("Time: \t\t" + PadString(String(millis())));
+    Serial.println("Dac: \t\t" + PadString(String(dacValue)));
+    Serial.println("Power: \t\t" + PadString(String(ina260.readPower())));
+    Serial.println("Voltage: \t" + PadString(String(ina260.readBusVoltage())));
     Serial.println("LA Position: \t" + PadString(String(myServo.presentPosition(LA_ID_NUM))));
 }
