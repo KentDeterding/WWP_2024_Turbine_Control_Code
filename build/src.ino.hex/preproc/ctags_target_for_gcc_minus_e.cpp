@@ -1,9 +1,9 @@
-# 1 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
-# 2 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
-# 3 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
-# 4 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
-# 5 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
-# 6 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
+# 1 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+# 2 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
+# 3 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
+# 4 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
+# 5 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
+# 6 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino" 2
 
 
 
@@ -25,21 +25,23 @@ unsigned long printTimerInterval = 1000;
 
 
 void setup () {
+    delay(1000);
+
     Serial.begin(9600);
     Serial.println("Starting up...");
     bool success = true;
 
     //Linear Actuator
     myServo.begin(32);
-    delay(10);
-    myServo.movingSpeed(0 /* ID number of the linear actuator*/, 750);
-    int pos = myServo.presentPosition(0 /* ID number of the linear actuator*/);
-    if (pos >= 0 && pos <= 4095) {
+    delay(100);
+    if (myServo.available()) {
         Serial.println("Linear actuator ready");
     } else {
         Serial.println("Linear actuator error");
         success = false;
     }
+    myServo.movingSpeed(0 /* ID number of the linear actuator*/, 750);
+    int pos = myServo.presentPosition(0 /* ID number of the linear actuator*/);
 
     //INA260
     ina260.begin(0x40);
@@ -67,8 +69,8 @@ void setup () {
 void loop () {
     if (Serial.available() > 0) {
         String serialInput = Serial.readStringUntil('\n');
-        Serial.flush();
         ProcessCommand(serialInput);
+        Serial.flush();
     }
 
     if (printTimer < millis()) {
@@ -94,9 +96,11 @@ void PrintOutput () {
 }
 
 Command getCommand (String command) {
+    Serial.println("Comman:" + command);
+
     if (command == "setDac") {
         return Command::SETDAC;
-    } else if (command == "setLA") {
+    } else if (command.toLowerCase() == "setla") {
         return Command::SETLA;
     } else {
         return Command::INVALID;
@@ -118,7 +122,7 @@ void ProcessCommand (String serialInput) {
             break;
         case Command::SETLA:
             myServo.goalPosition(0 /* ID number of the linear actuator*/, args.toInt());
-            Serial.println("Linear Actuator set to " + String(dacValue));
+            Serial.println("Linear Actuator set to " + String(args.toInt()));
             break;
     }
 }

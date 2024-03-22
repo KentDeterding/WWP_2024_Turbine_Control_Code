@@ -24,21 +24,22 @@ unsigned long printTimerInterval = 1000;
 
 
 void setup () {
+    delay(1000);
+
     Serial.begin(9600);
     Serial.println("Starting up...");
     bool success = true;
 
     //Linear Actuator
     myServo.begin(32);
-    delay(10);
-    myServo.movingSpeed(LA_ID_NUM, 750);
-    int pos = myServo.presentPosition(LA_ID_NUM);
-    if (pos >= 0 && pos <= 4095) {
+    delay(100);
+    if (myServo.available()) {
         Serial.println("Linear actuator ready");
     } else {
         Serial.println("Linear actuator error");
         success = false;
     }
+    myServo.movingSpeed(LA_ID_NUM, 750);
 
     //INA260
     ina260.begin(0x40);
@@ -66,8 +67,8 @@ void setup () {
 void loop () {
     if (Serial.available() > 0) {
         String serialInput = Serial.readStringUntil('\n');
-        Serial.flush();
         ProcessCommand(serialInput);
+        Serial.flush();
     }
 
     if (printTimer < millis()) {
@@ -93,9 +94,11 @@ void PrintOutput () {
 }
 
 Command getCommand (String command) {
+    Serial.println("Comman:" + command);
+
     if (command == "setDac") {
         return Command::SETDAC;
-    } else if (command == "setLA") {
+    } else if (command.toLowerCase() == "setla") {
         return Command::SETLA;
     } else {
         return Command::INVALID;
@@ -117,7 +120,7 @@ void ProcessCommand (String serialInput) {
             break;
         case Command::SETLA:
             myServo.goalPosition(LA_ID_NUM, args.toInt());
-            Serial.println("Linear Actuator set to " + String(dacValue));
+            Serial.println("Linear Actuator set to " + String(args.toInt()));
             break;
     }
 }

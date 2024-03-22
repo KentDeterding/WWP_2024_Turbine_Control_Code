@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#line 1 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 1 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 #include <Wire.h>
 #include <PA12.h>
 #include <Adafruit_INA260.h>
@@ -25,35 +25,37 @@ unsigned long printTimer = 0;
 unsigned long printTimerInterval = 1000;
 
 
-#line 26 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 26 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup();
-#line 66 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 68 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void loop();
-#line 79 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 81 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 String PadString(String str);
-#line 86 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 88 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void PrintOutput();
-#line 95 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 97 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 Command getCommand(String command);
-#line 105 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 109 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void ProcessCommand(String serialInput);
-#line 26 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 26 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup () {
+    delay(1000);
+
     Serial.begin(9600);
     Serial.println("Starting up...");
     bool success = true;
 
     //Linear Actuator
     myServo.begin(32);
-    delay(10);
-    myServo.movingSpeed(LA_ID_NUM, 750);
-    int pos = myServo.presentPosition(LA_ID_NUM);
-    if (pos >= 0 && pos <= 4095) {
+    delay(100);
+    if (myServo.available()) {
         Serial.println("Linear actuator ready");
     } else {
         Serial.println("Linear actuator error");
         success = false;
     }
+    myServo.movingSpeed(LA_ID_NUM, 750);
+    int pos = myServo.presentPosition(LA_ID_NUM);
 
     //INA260
     ina260.begin(0x40);
@@ -81,8 +83,8 @@ void setup () {
 void loop () {
     if (Serial.available() > 0) {
         String serialInput = Serial.readStringUntil('\n');
-        Serial.flush();
         ProcessCommand(serialInput);
+        Serial.flush();
     }
 
     if (printTimer < millis()) {
@@ -108,9 +110,11 @@ void PrintOutput () {
 }
 
 Command getCommand (String command) {
+    Serial.println("Comman:" + command);
+
     if (command == "setDac") {
         return Command::SETDAC;
-    } else if (command == "setLA") {
+    } else if (command.toLowerCase() == "setla") {
         return Command::SETLA;
     } else {
         return Command::INVALID;
@@ -132,7 +136,7 @@ void ProcessCommand (String serialInput) {
             break;
         case Command::SETLA:
             myServo.goalPosition(LA_ID_NUM, args.toInt());
-            Serial.println("Linear Actuator set to " + String(dacValue));
+            Serial.println("Linear Actuator set to " + String(args.toInt()));
             break;
     }
 }
