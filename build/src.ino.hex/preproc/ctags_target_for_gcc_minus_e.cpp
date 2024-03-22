@@ -9,6 +9,7 @@
 
 
 
+
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 
@@ -25,9 +26,8 @@ unsigned long printTimerInterval = 1000;
 
 
 void setup () {
-    delay(1000);
-
     Serial.begin(9600);
+    delay(1000); // Wait so serial monitor can be opened
     Serial.println("Starting up...");
     bool success = true;
 
@@ -41,7 +41,6 @@ void setup () {
         success = false;
     }
     myServo.movingSpeed(0 /* ID number of the linear actuator*/, 750);
-    int pos = myServo.presentPosition(0 /* ID number of the linear actuator*/);
 
     //INA260
     ina260.begin(0x40);
@@ -58,6 +57,9 @@ void setup () {
     delay(10);
     dac.setVoltage(dacValue, false);
     Serial.println("DAC ready");
+
+    //Relay
+    pinMode(33, 1);
 
     if (success) {
         Serial.println("Setup complete");
@@ -102,6 +104,8 @@ Command getCommand (String command) {
         return Command::SETDAC;
     } else if (command.toLowerCase() == "setla") {
         return Command::SETLA;
+    } else if (command.toLowerCase() == "switchpcc") {
+        return Command::SWITCHPCC;
     } else {
         return Command::INVALID;
     }
@@ -124,5 +128,7 @@ void ProcessCommand (String serialInput) {
             myServo.goalPosition(0 /* ID number of the linear actuator*/, args.toInt());
             Serial.println("Linear Actuator set to " + String(args.toInt()));
             break;
+        case Command::SWITCHPCC:
+            digitalWrite(33, !digitalRead(33));
     }
 }

@@ -7,7 +7,8 @@
 #include "types.h"
 
 
-#define LA_ID_NUM 0 // ID number of the linear actuator
+#define LA_ID_NUM 0         // ID number of the linear actuator
+#define PCC_Relay_Pin 33
 
 
 // Linear Actuator
@@ -25,23 +26,22 @@ unsigned long printTimer = 0;
 unsigned long printTimerInterval = 1000;
 
 
-#line 26 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 27 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup();
-#line 68 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 70 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void loop();
-#line 81 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 83 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 String PadString(String str);
-#line 88 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 90 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void PrintOutput();
-#line 97 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 99 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 Command getCommand(String command);
-#line 109 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 113 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void ProcessCommand(String serialInput);
-#line 26 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 27 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup () {
-    delay(1000);
-
     Serial.begin(9600);
+    delay(1000); // Wait so serial monitor can be opened
     Serial.println("Starting up...");
     bool success = true;
 
@@ -55,7 +55,6 @@ void setup () {
         success = false;
     }
     myServo.movingSpeed(LA_ID_NUM, 750);
-    int pos = myServo.presentPosition(LA_ID_NUM);
 
     //INA260
     ina260.begin(0x40);
@@ -72,6 +71,9 @@ void setup () {
     delay(10);
     dac.setVoltage(dacValue, false);
     Serial.println("DAC ready");
+
+    //Relay
+    pinMode(PCC_Relay_Pin, OUTPUT);
 
     if (success) {
         Serial.println("Setup complete");
@@ -116,6 +118,8 @@ Command getCommand (String command) {
         return Command::SETDAC;
     } else if (command.toLowerCase() == "setla") {
         return Command::SETLA;
+    } else if (command.toLowerCase() == "switchpcc") {
+        return Command::SWITCHPCC;
     } else {
         return Command::INVALID;
     }
@@ -138,5 +142,7 @@ void ProcessCommand (String serialInput) {
             myServo.goalPosition(LA_ID_NUM, args.toInt());
             Serial.println("Linear Actuator set to " + String(args.toInt()));
             break;
+        case Command::SWITCHPCC:
+            digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
     }
 }

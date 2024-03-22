@@ -1,5 +1,12 @@
 # WWP_2024_Turbine_Control_Code
  
+# to-do
+- Test relay control
+- Read RPM
+- Debug LA
+- MPPT for Load
+- Data recording
+- Better output in the serial monitor
 
 # Inputs
 
@@ -14,6 +21,9 @@ Pin Num = D11
 
 
 # Outputs
+
+### Relay
+Pin Num = D33
 
 ### Fan
 Pin Num = D20

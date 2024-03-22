@@ -2,5 +2,6 @@
 typedef enum {
     INVALID,
     SETDAC,
-    SETLA
+    SETLA,
+    SWITCHPCC
 } Command;

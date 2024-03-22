@@ -5,7 +5,8 @@
 #include "types.h"
 
 
-#define LA_ID_NUM 0 // ID number of the linear actuator
+#define LA_ID_NUM 0         // ID number of the linear actuator
+#define PCC_Relay_Pin 33
 
 
 // Linear Actuator
@@ -24,9 +25,8 @@ unsigned long printTimerInterval = 1000;
 
 
 void setup () {
-    delay(1000);
-
     Serial.begin(9600);
+    delay(1000); // Wait so serial monitor can be opened
     Serial.println("Starting up...");
     bool success = true;
 
@@ -56,6 +56,9 @@ void setup () {
     delay(10);
     dac.setVoltage(dacValue, false);
     Serial.println("DAC ready");
+
+    //Relay
+    pinMode(PCC_Relay_Pin, OUTPUT);
 
     if (success) {
         Serial.println("Setup complete");
@@ -100,6 +103,8 @@ Command getCommand (String command) {
         return Command::SETDAC;
     } else if (command.toLowerCase() == "setla") {
         return Command::SETLA;
+    } else if (command.toLowerCase() == "switchpcc") {
+        return Command::SWITCHPCC;
     } else {
         return Command::INVALID;
     }
@@ -122,5 +127,10 @@ void ProcessCommand (String serialInput) {
             myServo.goalPosition(LA_ID_NUM, args.toInt());
             Serial.println("Linear Actuator set to " + String(args.toInt()));
             break;
+        case Command::SWITCHPCC:
+            digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
+            Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? 'High' : 'Low');
+        default:
+            Serial.println("Command not implemented");
     }
 }
