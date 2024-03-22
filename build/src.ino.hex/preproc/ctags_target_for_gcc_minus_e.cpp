@@ -94,7 +94,8 @@ void PrintOutput () {
     Serial.println("Dac: \t\t" + PadString(String(dacValue)));
     Serial.println("Power: \t\t" + PadString(String(ina260.readPower())));
     Serial.println("Voltage: \t" + PadString(String(ina260.readBusVoltage())));
-    Serial.println("LA Position: \t" + PadString(String(myServo.presentPosition(0 /* ID number of the linear actuator*/))));
+    Serial.println("LA Position: \t" + String(myServo.presentPosition(0 /* ID number of the linear actuator*/)));
+    //Serial.println("Relay State: " + (digitalRead(PCC_Relay_Pin) ? 'High' : 'Low'));
 }
 
 Command getCommand (String command) {
@@ -130,5 +131,8 @@ void ProcessCommand (String serialInput) {
             break;
         case Command::SWITCHPCC:
             digitalWrite(33, !digitalRead(33));
+            //Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? 'High' : 'Low');
+        default:
+            Serial.println("Command not implemented");
     }
 }

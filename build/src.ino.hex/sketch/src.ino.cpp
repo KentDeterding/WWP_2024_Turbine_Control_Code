@@ -34,9 +34,9 @@ void loop();
 String PadString(String str);
 #line 90 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void PrintOutput();
-#line 99 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 100 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 Command getCommand(String command);
-#line 113 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 114 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void ProcessCommand(String serialInput);
 #line 27 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup () {
@@ -108,7 +108,8 @@ void PrintOutput () {
     Serial.println("Dac: \t\t" + PadString(String(dacValue)));
     Serial.println("Power: \t\t" + PadString(String(ina260.readPower())));
     Serial.println("Voltage: \t" + PadString(String(ina260.readBusVoltage())));
-    Serial.println("LA Position: \t" + PadString(String(myServo.presentPosition(LA_ID_NUM))));
+    Serial.println("LA Position: \t" + String(myServo.presentPosition(LA_ID_NUM)));
+    //Serial.println("Relay State: " + (digitalRead(PCC_Relay_Pin) ? 'High' : 'Low'));
 }
 
 Command getCommand (String command) {
@@ -144,5 +145,8 @@ void ProcessCommand (String serialInput) {
             break;
         case Command::SWITCHPCC:
             digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
+            //Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? 'High' : 'Low');
+        default:
+            Serial.println("Command not implemented");
     }
 }

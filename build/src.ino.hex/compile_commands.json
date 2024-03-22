@@ -478,11 +478,11 @@
    "-IC:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO",
    "-IC:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.58.1\\libraries\\SPI",
    "-IC:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_MCP4725",
-   "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp",
+   "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp",
    "-o",
-   "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp.o"
+   "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp.o"
   ],
-  "file": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp"
+  "file": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp"
  },
  {
   "directory": "c:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code",
@@ -523,11 +523,11 @@
    "-IC:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO",
    "-IC:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.58.1\\libraries\\SPI",
    "-IC:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_MCP4725",
-   "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp",
+   "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp",
    "-o",
-   "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp.o"
+   "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp.o"
   ],
-  "file": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_SPIDevice.cpp"
+  "file": "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\Adafruit_BusIO\\Adafruit_I2CDevice.cpp"
  },
  {
   "directory": "c:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code",

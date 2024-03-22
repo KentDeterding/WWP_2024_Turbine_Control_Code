@@ -3,10 +3,12 @@
 # to-do
 - Test relay control
 - Read RPM
-- Debug LA
 - MPPT for Load
 - Data recording
 - Better output in the serial monitor
+- Diff Pressure Sensor Model#: SEN0343
+- PCC Disconnect    Pin 30 high = turbine side high voltage
+- Safety Switch
 
 # Inputs
 
