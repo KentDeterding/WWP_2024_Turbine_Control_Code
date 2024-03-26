@@ -4,11 +4,12 @@
 #include <PA12.h>
 #include <Adafruit_INA260.h>
 #include <Adafruit_MCP4725.h>
-#include "types.h"
+#include "filter.h"
+#include "commands.h"
 
 
 #define LA_ID_NUM 0         // ID number of the linear actuator
-#define PCC_Relay_Pin 33
+#define PCC_Relay_Pin 33    // Relay control pin
 
 
 // Linear Actuator
@@ -20,29 +21,47 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 // DAC
 Adafruit_MCP4725 dac;
 uint16_t dacValue = 4090; // 0 - 4095
+float targetResistance = 8;
 
 // Timers
-unsigned long printTimer = 0;
+unsigned long printTimer;
 unsigned long printTimerInterval = 1000;
+unsigned long resistanceTracingTimer;
+unsigned long resistanceTrackingInterval = 100;
+
+// RPM
+#define RPM_Pin 29
+struct Filter* rpm_filter = CreateFilter(10, 14);
+
+// Global State
+bool trackResistance = false;
+int dacStepSize = 100;
 
 
-#line 27 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 39 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup();
-#line 70 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 91 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void loop();
-#line 83 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 122 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 String PadString(String str);
-#line 90 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 129 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void PrintOutput();
-#line 100 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
-Command getCommand(String command);
-#line 114 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 143 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void ProcessCommand(String serialInput);
-#line 27 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 165 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+void Set(String command);
+#line 182 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+void Switch(String command);
+#line 192 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+void RPM_Interrupt();
+#line 39 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup () {
     Serial.begin(9600);
     delay(1000); // Wait so serial monitor can be opened
     Serial.println("Starting up...");
+    while (!Serial.available()) {
+        delay(10);
+    }
     bool success = true;
 
     //Linear Actuator
@@ -75,11 +94,17 @@ void setup () {
     //Relay
     pinMode(PCC_Relay_Pin, OUTPUT);
 
+    // Start RPM Tracking
+    attachInterrupt(digitalPinToInterrupt(RPM_Pin), RPM_Interrupt, RISING);
+
     if (success) {
         Serial.println("Setup complete");
     } else {
         Serial.println("Setup failed");
     }
+
+    printTimer = millis();
+    resistanceTracingTimer = millis();
 }
 
 void loop () {
@@ -93,6 +118,24 @@ void loop () {
         printTimer += printTimerInterval;
         PrintOutput();
     }
+
+    // Track load resistance
+    if (resistanceTracingTimer < millis() && trackResistance) {
+        resistanceTracingTimer += resistanceTrackingInterval;
+
+        float voltage = ina260.readBusVoltage();
+        float current = ina260.readCurrent();
+        float resistance = voltage / current;
+
+        float difference = resistance - targetResistance;
+
+        if (difference > 0) {
+            dacValue += dacStepSize;
+        } else {
+            dacValue -= dacStepSize;
+        }
+        dac.setVoltage(dacValue, false);
+    }
 }
 
 String PadString (String str) {
@@ -104,49 +147,68 @@ String PadString (String str) {
 
 void PrintOutput () {
     Serial.println("");
+    Serial.println("");
     Serial.println("Time: \t\t" + PadString(String(millis())));
     Serial.println("Dac: \t\t" + PadString(String(dacValue)));
     Serial.println("Power: \t\t" + PadString(String(ina260.readPower())));
     Serial.println("Voltage: \t" + PadString(String(ina260.readBusVoltage())));
     Serial.println("LA Position: \t" + String(myServo.presentPosition(LA_ID_NUM)));
-    //Serial.println("Relay State: " + (digitalRead(PCC_Relay_Pin) ? 'High' : 'Low'));
+    String relayState = digitalRead(PCC_Relay_Pin) ? "High" : "Low";
+    Serial.println("Relay State: " + relayState);
+    Serial.println("RPM: " + String(GetRpmBuffered(rpm_filter)));
 }
 
-Command getCommand (String command) {
-    Serial.println("Comman:" + command);
-
-    if (command == "setDac") {
-        return Command::SETDAC;
-    } else if (command.toLowerCase() == "setla") {
-        return Command::SETLA;
-    } else if (command.toLowerCase() == "switchpcc") {
-        return Command::SWITCHPCC;
-    } else {
-        return Command::INVALID;
-    }
-}
 
 void ProcessCommand (String serialInput) {
-    Command command = getCommand(serialInput.substring(0, serialInput.indexOf(" ")));
-    String args = serialInput.substring(serialInput.indexOf(" ") + 1);
+    String command = NextArg(&serialInput);
 
-    switch (command) {
+    switch (MatchCommand(command)) {
         case Command::INVALID:
-            Serial.println("Invalid command");
+            Serial.println("Invalid command: try \"help\"");
             break;
-        case Command::SETDAC:
-            dacValue = args.toInt();
-            dac.setVoltage(dacValue, false);
-            Serial.println("DAC set to " + String(dacValue));
+        case Command::HELP:
+            Help();
             break;
-        case Command::SETLA:
-            myServo.goalPosition(LA_ID_NUM, args.toInt());
-            Serial.println("Linear Actuator set to " + String(args.toInt()));
+        case Command::SET:
+            Set(command);
             break;
-        case Command::SWITCHPCC:
-            digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
-            //Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? 'High' : 'Low');
+        case Command::SWITCH:
+            Switch(command);
+            break;
         default:
             Serial.println("Command not implemented");
     }
+}
+
+// 
+void Set(String command) {
+    String arg = NextArg(&command);
+    
+    if (arg.toLowerCase() == "dac") {
+        dacValue = NextArg(&command).toInt();
+        dac.setVoltage(dacValue, false);
+        Serial.println("DAC set to " + String(dacValue));
+    } else if (arg.toLowerCase() == "la") {
+        int pos = NextArg(&command).toInt();
+        myServo.goalPosition(LA_ID_NUM, pos);
+        Serial.println("Linear Actuator set to " + String(pos));
+    } else if (arg.toLowerCase() == "res") {
+        targetResistance = NextArg(&command).toFloat();
+    }
+}
+
+//
+void Switch(String command) {
+    String arg = NextArg(&command);
+
+    if (arg.toLowerCase() == "pcc") {
+        digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
+        Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? "High" : "Low");
+    }
+}
+
+// Interrupt for measuring the RPM
+void RPM_Interrupt () {
+    int time = (int)micros();
+    Insert(rpm_filter, time);
 }

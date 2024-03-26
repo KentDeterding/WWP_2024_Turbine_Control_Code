@@ -18,4 +18,6 @@ C:\Users\Kent4\Projects\Wind_Power\WWP_2024_Turbine_Control_Code\build\src.ino.h
  C:\Users\Kent4\AppData\Local\Arduino15\packages\teensy\hardware\avr\1.58.1\cores\teensy4/DMAChannel.h \
  C:\Users\Kent4\AppData\Local\Arduino15\packages\teensy\hardware\avr\1.58.1\cores\teensy4/EventResponder.h \
  C:\Users\Kent4\Documents\Arduino\libraries\Adafruit_MCP4725/Adafruit_MCP4725.h \
+ C:\Users\Kent4\Projects\Wind_Power\WWP_2024_Turbine_Control_Code\build\src.ino.hex\sketch\filter.h \
+ C:\Users\Kent4\Projects\Wind_Power\WWP_2024_Turbine_Control_Code\build\src.ino.hex\sketch\commands.h \
  C:\Users\Kent4\Projects\Wind_Power\WWP_2024_Turbine_Control_Code\build\src.ino.hex\sketch\types.h

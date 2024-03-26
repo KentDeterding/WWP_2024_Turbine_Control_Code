@@ -7,8 +7,9 @@
 - Data recording
 - Better output in the serial monitor
 - Diff Pressure Sensor Model#: SEN0343
-- PCC Disconnect    Pin 30 high = turbine side high voltage
+- PCC Disconnect
 - Safety Switch
+- Make DAC ergonimics better (struct)
 
 # Inputs
 
@@ -17,6 +18,7 @@ Pin Num = D29
 
 ### PCC Disconnect
 Pin Num = D30
+    30 High = TS High Voltage
 
 ### Safety Switch
 Pin Num = D11
