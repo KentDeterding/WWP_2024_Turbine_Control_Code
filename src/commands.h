@@ -9,6 +9,6 @@ String NextArg(String* command);
 
 Command MatchCommand(String command);
 
-void Help();
+String Help();
 
 #endif

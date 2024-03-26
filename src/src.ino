@@ -5,9 +5,9 @@
 #include "filter.h"
 #include "commands.h"
 
-
 #define LA_ID_NUM 0         // ID number of the linear actuator
 #define PCC_Relay_Pin 33    // Relay control pin
+#define Safety_Switch_Pin 11
 
 
 // Linear Actuator
@@ -18,18 +18,18 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 
 // DAC
 Adafruit_MCP4725 dac;
-uint16_t dacValue = 4090; // 0 - 4095
+uint16_t dacValue = 4095; // 0 - 4095
 float targetResistance = 8;
+
+// RPM
+#define RPM_Pin 29
+struct Filter* rpm_filter = CreateFilter(10, 14);
 
 // Timers
 unsigned long printTimer;
 unsigned long printTimerInterval = 1000;
 unsigned long resistanceTracingTimer;
 unsigned long resistanceTrackingInterval = 100;
-
-// RPM
-#define RPM_Pin 29
-struct Filter* rpm_filter = CreateFilter(10, 14);
 
 // Global State
 bool trackResistance = false;
@@ -39,12 +39,14 @@ bool printOutput = true;
 
 void setup () {
     Serial.begin(9600);
-    delay(1000); // Wait so serial monitor can be opened
-    Serial.println("Starting up...");
-    while (!Serial.available()) {
+    while (!Serial) { // Wait so serial monitor can be opened
         delay(10);
     }
+    Serial.println("Starting up...");
     bool success = true;
+
+    // Saftey Switch
+    pinMode(Safety_Switch_Pin, INPUT);
 
     //Linear Actuator
     myServo.begin(32);
@@ -66,7 +68,7 @@ void setup () {
         Serial.println("INA260 error");
         success = false;
     }
-    
+
     //DAC
     dac.begin(0x64);
     delay(10);
@@ -85,6 +87,12 @@ void setup () {
         Serial.println("Setup failed");
     }
 
+    Serial.println("Enter a name for data file: (if blank, no data will be logged)");
+    while(!Serial.available()) {}
+    String fileName = Serial.readString().trim();
+
+    Serial.println("Type \"help\" for a list of commands");
+
     printTimer = millis();
     resistanceTracingTimer = millis();
 }
@@ -99,6 +107,12 @@ void loop () {
     if (printTimer < millis() && printOutput) {
         printTimer += printTimerInterval;
         PrintOutput();
+    }
+
+    if (digitalRead(Safety_Switch_Pin) == HIGH) {
+        myServo.goalPosition(LA_ID_NUM, 0);
+        dacValue = 4095;
+        dac.setVoltage(dacValue, false);
     }
 
     // Track load resistance
@@ -128,18 +142,17 @@ String PadString (String str) {
 }
 
 void PrintOutput () {
-    Serial.println("");
-    Serial.println("");
-    Serial.println("Time: \t\t" + PadString(String(millis())));
-    Serial.println("Dac: \t\t" + PadString(String(dacValue)));
-    Serial.println("Power: \t\t" + PadString(String(ina260.readPower())));
-    Serial.println("Voltage: \t" + PadString(String(ina260.readBusVoltage())));
-    Serial.println("LA Position: \t" + String(myServo.presentPosition(LA_ID_NUM)));
+    Serial.print("\n\n\n");
+    Serial.println("Time:          \t" + PadString(String(millis())));
     String relayState = digitalRead(PCC_Relay_Pin) ? "High" : "Low";
-    Serial.println("Relay State: " + relayState);
-    Serial.println("RPM: " + String(GetRpmBuffered(rpm_filter)));
+    Serial.println("\tRelay State: " + PadString(relayState));
+    Serial.println("\tLA Position: " + PadString(String(myServo.presentPosition(LA_ID_NUM))));
+    Serial.println("\tDac:         " + PadString(String(dacValue)));
+    Serial.println("\tCurrent:     " + PadString(String(ina260.readCurrent())));
+    Serial.println("\tVoltage:     " + PadString(String(ina260.readBusVoltage())));
+    Serial.println("\tPower:       " + PadString(String(ina260.readPower())));
+    Serial.println("\tRPM:         " + PadString(String(GetRpmBuffered(rpm_filter))));
 }
-
 
 void ProcessCommand (String serialInput) {
     String command = NextArg(&serialInput);
@@ -149,20 +162,19 @@ void ProcessCommand (String serialInput) {
             Serial.println("Invalid command: try \"help\"");
             break;
         case Command::HELP:
-            Help();
+            Serial.println(Help());
             break;
         case Command::SET:
             Set(command);
             break;
-        case Command::SWITCH:
-            Switch(command);
+        case Command::TOGGLE:
+            Toggle(command);
             break;
         default:
             Serial.println("Command not implemented");
     }
 }
 
-// 
 void Set(String command) {
     String arg = NextArg(&command).toLowerCase();
     
@@ -182,15 +194,16 @@ void Set(String command) {
     }
 }
 
-//
-void Switch(String command) {
+void Toggle(String command) {
     String arg = NextArg(&command).toLowerCase();
 
     if (arg == "pcc") {
         digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
         Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? "High" : "Low");
     } else if (arg = "res") {
-
+        trackResistance = !trackResistance;
+    } else if (arg = "print") {
+        printOutput = !printOutput;
     } else {
         Serial.println("Invalid subcommand for switch");
         Serial.println("Try \"help\"");

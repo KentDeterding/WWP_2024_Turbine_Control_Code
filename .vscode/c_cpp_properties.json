@@ -12,7 +12,7 @@
             ],
             "intelliSenseMode": "gcc-x64",
             "includePath": [
-                "C:\\Users\\Kent4\\AppData\\Local\\Temp\\arduino\\sketches\\886DFB291F4B9ABBF8CC9F926DDA1235\\pch",
+                "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\pch",
                 "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\cores\\teensy4",
                 "C:\\Users\\Kent4\\AppData\\Local\\Arduino15\\packages\\teensy\\hardware\\avr\\1.59.0\\libraries\\Wire",
                 "C:\\Users\\Kent4\\Documents\\Arduino\\libraries\\PA12_Arduino",
@@ -29,7 +29,7 @@
                 "c:\\users\\kent4\\appdata\\local\\arduino15\\packages\\teensy\\tools\\teensy-compile\\11.3.1\\arm\\arm-none-eabi\\include"
             ],
             "forcedInclude": [
-                "C:\\Users\\Kent4\\AppData\\Local\\Temp\\arduino\\sketches\\886DFB291F4B9ABBF8CC9F926DDA1235\\pch\\Arduino.h"
+                "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\build\\src.ino.hex\\pch\\Arduino.h"
             ],
             "cStandard": "c11",
             "cppStandard": "c++17",

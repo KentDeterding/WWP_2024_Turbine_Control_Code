@@ -1,36 +1,37 @@
 # WWP_2024_Turbine_Control_Code
  
 # to-do
-- Test relay control
-- Read RPM
-- MPPT for Load
-- Data recording
+- T - relay control
+- T - Read RPM
+- T - MPPT for Load
+- Safety Switch
+- PCC Disconnect
+- Fan
 - Better output in the serial monitor
 - Diff Pressure Sensor Model#: SEN0343
-- PCC Disconnect
-- Safety Switch
-- Make DAC ergonimics better (struct)
+- Make DAC ergonimics better (struct?)
+- Data recording (SDFat Library)
 
 # Inputs
 
 ### RPM Square Wave
-Pin Num = D29
+Pin Num = 29
 
 ### PCC Disconnect
-Pin Num = D30
+Pin Num = 30
     30 High = TS High Voltage
 
 ### Safety Switch
-Pin Num = D11
+Pin Num = 11
 
 
 # Outputs
 
 ### Relay
-Pin Num = D33
+Pin Num = 33
 
 ### Fan
-Pin Num = D20
+Pin Num = 20
 
 ## I2C
 

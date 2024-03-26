@@ -11,8 +11,8 @@ String NextArg(String* command) {
 Command MatchCommand(String command) {
     if (command == "set") {
         return Command::SET;
-    } else if (command.toLowerCase() == "switch") {
-        return Command::SWITCH;
+    } else if (command.toLowerCase() == "toggle") {
+        return Command::TOGGLE;
     } else if (command.toLowerCase() == "help") {
         return Command::HELP;
     } else {
@@ -21,18 +21,17 @@ Command MatchCommand(String command) {
 }
 
 // Help menu
-void Help() {
-    /*
-    Serial.println("List of valid commands:");
-    Serial.println("");
-    Serial.println("set <target> <value>");
-    Serial.println("    | dac <int>");
-    Serial.println("    | res <float>");
-    Serial.println("    | la <int>");
-    Serial.println("    | pitch <float>");
-    Serial.println("switch <traget>");
-    Serial.println("    | pcc");
-    Serial.println("    | res");
-    */
+String Help() {
     // TODO: Fill in commands
+    String string =   "List of valid commands:\n";
+            string += "set <target> <value>\n";
+            string += "    | dac <int>\n" +
+            string += "    | res <float>\n" +
+            string += "    | la <int>\n" +
+            string += "    | pitch <float> (not implemented)\n" +
+            string += "toggle <traget>\n" +
+            string += "    | pcc\n" +
+            string += "    | res (resistance tracking)\n" +
+            string += "    | print\n";
+    return string;
 }
