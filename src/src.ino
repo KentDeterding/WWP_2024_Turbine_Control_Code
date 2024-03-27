@@ -34,7 +34,7 @@ unsigned long resistanceTrackingInterval = 100;
 // Global State
 bool trackResistance = false;
 int dacStepSize = 100;
-bool printOutput = true;
+bool printOutput = false;
 
 
 void setup () {
@@ -52,12 +52,12 @@ void setup () {
     myServo.begin(32);
     delay(100);
     if (myServo.available()) {
+        myServo.movingSpeed(LA_ID_NUM, 750);
         Serial.println("Linear actuator ready");
     } else {
         Serial.println("Linear actuator error");
         success = false;
     }
-    myServo.movingSpeed(LA_ID_NUM, 750);
 
     //INA260
     ina260.begin(0x40);
@@ -105,13 +105,13 @@ void loop () {
         PrintOutput();
     }
 
-    /*
-    if (digitalRead(Safety_Switch_Pin) == HIGH) {
+/*
+    if (digitalRead(Safety_Switch_Pin) != HIGH) {
         myServo.goalPosition(LA_ID_NUM, 0);
         dacValue = 4095;
         dac.setVoltage(dacValue, false);
     }
-    */
+*/
 
     // Track load resistance
     if (resistanceTracingTimer < millis() && trackResistance) {
@@ -154,10 +154,11 @@ void PrintOutput () {
     Serial.println("\tRPM:         " + PadString(String(GetRpmBuffered(rpm_filter))));
 }
 
-void ProcessCommand (String serialInput) {
-    String command = NextArg(serialInput);
+void ProcessCommand (String &serialInput) {
+    String command = serialInput;
+    String cmd = NextArg(command);
 
-    switch (MatchCommand(command)) {
+    switch (MatchCommand(cmd)) {
         case Command::INVALID:
             Serial.println("Invalid command: try \"help\"");
             break;
@@ -168,7 +169,6 @@ void ProcessCommand (String serialInput) {
             Set(command);
             break;
         case Command::TOGGLE:
-            Serial.println("Toggle command");
             Toggle(command);
             break;
         default:
@@ -176,7 +176,7 @@ void ProcessCommand (String serialInput) {
     }
 }
 
-void Set(String command) {
+void Set(String &command) {
     String arg = NextArg(command).toLowerCase();
     
     if (arg == "dac") {
@@ -195,13 +195,8 @@ void Set(String command) {
     }
 }
 
-void Toggle(String command) {
+void Toggle(String &command) {
     String arg = NextArg(command).toLowerCase();
-    Serial.println(command);
-    Serial.println(command.substring(command.indexOf(" ") + 1).trim());
-    arg = command.substring(command.indexOf(" ") + 1).trim();
-    Serial.println(arg);
-    arg = "pcc";
 
     if (arg == "pcc") {
         digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));

@@ -1,18 +1,18 @@
 
-C:\Users\Kent4\Projects\Wind_Power\WWP_2024_Turbine_Control_Code\build\src.ino.hex/src.ino.elf:     file format elf32-littlearm
+C:\Users\Kent4\Projects\Wildcat_Wind_Power\WWP_2024_Turbine_Control_Code\build\src.ino.hex/src.ino.elf:     file format elf32-littlearm
 
 SYMBOL TABLE:
 60000000 l    d  .text.headers	00000000 .text.headers
 60001400 l    d  .text.code	00000000 .text.code
-60001ff8 l    d  .text.progmem	00000000 .text.progmem
+60001e88 l    d  .text.progmem	00000000 .text.progmem
 00000000 l    d  .text.itcm	00000000 .text.itcm
-0000cc30 l    d  .fini	00000000 .fini
-0000cc34 l    d  .ARM.exidx	00000000 .ARM.exidx
+0000bae0 l    d  .fini	00000000 .fini
+0000bae4 l    d  .ARM.exidx	00000000 .ARM.exidx
 20000000 l    d  .data	00000000 .data
-200022c0 l    d  .bss	00000000 .bss
+20001ac0 l    d  .bss	00000000 .bss
 20200000 l    d  .bss.dma	00000000 .bss.dma
 70000000 l    d  .bss.extram	00000000 .bss.extram
-600110f8 l    d  .text.csf	00000000 .text.csf
+6000f53c l    d  .text.csf	00000000 .text.csf
 00000000 l    d  .debug_info	00000000 .debug_info
 00000000 l    d  .debug_abbrev	00000000 .debug_abbrev
 00000000 l    d  .debug_line	00000000 .debug_line
@@ -26,110 +26,58 @@ SYMBOL TABLE:
 00000000 l    d  .debug_line_str	00000000 .debug_line_str
 00000000 l    df *ABS*	00000000 bootdata.c
 00000000 l    df *ABS*	00000000 startup.c
-60001400 l     F .text.code	00000016 memory_copy
-60001418 l     F .text.code	00000010 memory_clear
-60001428 l     F .text.code	000001fc ResetHandler2
-00000000 l    df *ABS*	00000000 WireIMXRT.cpp
-00001504 l     F .text.itcm	00000044 _GLOBAL__sub_I__ZN7TwoWire5beginEv
+60001400 l     F .text.code	00000012 memory_copy
+60001414 l     F .text.code	0000001c memory_clear.constprop.0
+60001430 l     F .text.code	0000021c ResetHandler2
 00000000 l    df *ABS*	00000000 tempmon.c
-20003dac l     O .bss	00000004 s_hotCount
-20003db0 l     O .bss	00000004 s_hotTemp
-20003db4 l     O .bss	00000004 s_hot_ROOM
-20003db8 l     O .bss	00000004 s_roomC_hotC
+20002b24 l     O .bss	00000004 s_hotCount
+20002b28 l     O .bss	00000004 s_hotTemp
+20002b2c l     O .bss	00000004 s_hot_ROOM
+20002b30 l     O .bss	00000004 s_roomC_hotC
 00000000 l    df *ABS*	00000000 usb.c
-000048dc l     F .text.itcm	00000088 schedule_transfer
-00004964 l     F .text.itcm	00000036 run_callbacks
-0000499c l     F .text.itcm	00000098 endpoint0_transmit.constprop.0
-200032d4 l     O .bss	00000008 endpoint0_buffer
-200032dc l     O .bss	00000004 endpoint0_notify_mask
-20002480 l     O .bss	00000008 endpoint0_setupdata
-200032e0 l     O .bss	00000004 endpointN_notify_mask
-20003d6c l     O .bss	00000008 reply_buffer
-20003ded l     O .bss	00000001 sof_usage
-20003df5 l     O .bss	00000001 usb_reboot_timer
+00002f64 l     F .text.itcm	00000088 schedule_transfer
+00002fec l     F .text.itcm	00000036 run_callbacks
+00003024 l     F .text.itcm	00000098 endpoint0_transmit.constprop.0
+2000204c l     O .bss	00000008 endpoint0_buffer
+20002054 l     O .bss	00000004 endpoint0_notify_mask
+20001c80 l     O .bss	00000008 endpoint0_setupdata
+20002058 l     O .bss	00000004 endpointN_notify_mask
+20002ae4 l     O .bss	00000008 reply_buffer
+20002b66 l     O .bss	00000001 sof_usage
+20002b6e l     O .bss	00000001 usb_reboot_timer
 00000000 l    df *ABS*	00000000 analog.c
-20003de9 l     O .bss	00000001 calibrating
+20002b61 l     O .bss	00000001 calibrating
 00000000 l    df *ABS*	00000000 crti.o
 00000000 l    df *ABS*	00000000 crtn.o
 00000000 l    df *ABS*	00000000 crtstuff.c
-000000dc l     F .text.itcm	00000000 register_tm_clones
-00000100 l     F .text.itcm	00000000 frame_dummy
-20003d50 l     O .bss	00000000 object.0
-60001fc8 l     O .text.code	00000000 __frame_dummy_init_array_entry
+00000020 l     F .text.itcm	00000000 register_tm_clones
+00000044 l     F .text.itcm	00000000 frame_dummy
+20002ac8 l     O .bss	00000000 object.0
+60001e80 l     O .text.code	00000000 __frame_dummy_init_array_entry
 00000000 l    df *ABS*	00000000 src.ino.cpp
-00000f40 l     F .text.itcm	00000050 _GLOBAL__sub_I_myServo
-00000000 l    df *ABS*	00000000 SPI.cpp
-000025e0 l     F .text.itcm	00000060 SPIClass::transfer(void const*, void*, unsigned int) [clone .part.0]
-0000282c l     F .text.itcm	00000048 _GLOBAL__sub_I__ZN8SPIClass5beginEv
-00000000 l    df *ABS*	00000000 HardwareSerial1.cpp
-0000303c l     F .text.itcm	00000074 _GLOBAL__sub_I_IRQHandler_Serial1
-20002c38 l     O .bss	00000040 rx_buffer1
-20002e38 l     O .bss	00000040 tx_buffer1
-20000618 l     O .data	00000064 UART6_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial2.cpp
-000030bc l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial2
-20002c78 l     O .bss	00000040 rx_buffer2
-20002e78 l     O .bss	00000028 tx_buffer2
-200013f4 l     O .data	00000064 UART4_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial3.cpp
-00003140 l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial3
-20002cb8 l     O .bss	00000040 rx_buffer3
-20002ea0 l     O .bss	00000028 tx_buffer3
-2000132c l     O .data	00000064 UART2_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial4.cpp
-000031c4 l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial4
-20002cf8 l     O .bss	00000040 rx_buffer4
-20002ec8 l     O .bss	00000028 tx_buffer4
-20001390 l     O .data	00000064 UART3_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial5.cpp
-00003248 l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial5
-20002d38 l     O .bss	00000040 rx_buffer5
-20002ef0 l     O .bss	00000028 tx_buffer5
-20001520 l     O .data	00000064 UART8_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial6.cpp
-000032cc l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial6
-20002d78 l     O .bss	00000040 rx_buffer6
-20002f18 l     O .bss	00000028 tx_buffer6
-200012c8 l     O .data	00000064 UART1_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial7.cpp
-00003350 l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial7
-20002db8 l     O .bss	00000040 rx_buffer7
-20002f40 l     O .bss	00000028 tx_buffer7
-200014bc l     O .data	00000064 UART7_Hardware
-00000000 l    df *ABS*	00000000 HardwareSerial8.cpp
-000033d4 l     F .text.itcm	00000078 _GLOBAL__sub_I_IRQHandler_Serial8
-20002df8 l     O .bss	00000040 rx_buffer8
-20002f68 l     O .bss	00000028 tx_buffer8
-20001458 l     O .data	00000064 UART5_Hardware
-00000000 l    df *ABS*	00000000 EventResponder.cpp
-00000000 l    df *ABS*	00000000 serialEvent1.cpp
-00000000 l    df *ABS*	00000000 serialEvent2.cpp
-00000000 l    df *ABS*	00000000 serialEvent3.cpp
-00000000 l    df *ABS*	00000000 serialEvent4.cpp
-00000000 l    df *ABS*	00000000 serialEvent5.cpp
-00000000 l    df *ABS*	00000000 serialEvent6.cpp
-00000000 l    df *ABS*	00000000 serialEvent7.cpp
-00000000 l    df *ABS*	00000000 serialEvent8.cpp
+00000cdc l     F .text.itcm	00000050 _GLOBAL__sub_I_myServo
 00000000 l    df *ABS*	00000000 usb_desc.c
-20001b20 l     O .data	00000012 device_descriptor
-20001d34 l     O .data	00000028 microsoft_os_compatible_id_desc
-20001d5c l     O .data	00000012 microsoft_os_string_desc
-600021f0 l     O .text.progmem	0000000a qualifier_descriptor
-00000000 l    df *ABS*	00000000 interrupt.c
-00003f14 l     F .text.itcm	00000002 dummy_isr
-20000398 l     O .data	00000014 CSWTCH.6
+200016cc l     O .data	00000012 device_descriptor
+200016e0 l     O .data	00000028 microsoft_os_compatible_id_desc
+20001708 l     O .data	00000012 microsoft_os_string_desc
+60001f84 l     O .text.progmem	0000000a qualifier_descriptor
 00000000 l    df *ABS*	00000000 commands.cpp
 00000000 l    df *ABS*	00000000 filter.cpp
+00000000 l    df *ABS*	00000000 WireIMXRT.cpp
 00000000 l    df *ABS*	00000000 PA12.cpp
-00000000 l    df *ABS*	00000000 IR_Protocol.c
-00000000 l    df *ABS*	00000000 SoftwareSerial.cpp
 00000000 l    df *ABS*	00000000 Adafruit_INA260.cpp
 00000000 l    df *ABS*	00000000 Adafruit_BusIO_Register.cpp
 00000000 l    df *ABS*	00000000 Adafruit_I2CDevice.cpp
 00000000 l    df *ABS*	00000000 Adafruit_SPIDevice.cpp
-00002120 l     F .text.itcm	000001b4 Adafruit_SPIDevice::transfer(unsigned char*, unsigned int) [clone .part.0]
+00001948 l     F .text.itcm	000001b4 Adafruit_SPIDevice::transfer(unsigned char*, unsigned int) [clone .part.0]
+00000000 l    df *ABS*	00000000 SPI.cpp
+00001d38 l     F .text.itcm	00000060 SPIClass::transfer(void const*, void*, unsigned int) [clone .part.0]
 00000000 l    df *ABS*	00000000 Adafruit_MCP4725.cpp
-00000000 l    df *ABS*	00000000 HardwareSerial.cpp
+00000000 l    df *ABS*	00000000 EventResponder.cpp
+00000000 l    df *ABS*	00000000 HardwareSerial1.cpp
+20001c88 l     O .bss	00000040 rx_buffer1
+20001cc8 l     O .bss	00000040 tx_buffer1
+20000608 l     O .data	00000060 UART6_Hardware
 00000000 l    df *ABS*	00000000 Print.cpp
 00000000 l    df *ABS*	00000000 Stream.cpp
 00000000 l    df *ABS*	00000000 WString.cpp
@@ -140,33 +88,33 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 memcpy-armv7m.S.o
 00000000 l    df *ABS*	00000000 new.cpp
 00000000 l    df *ABS*	00000000 nonstd.c
-00000000 l    df *ABS*	00000000 pwm.c
 00000000 l    df *ABS*	00000000 usb_inst.cpp
 00000000 l    df *ABS*	00000000 usb_serial.c
-0000523c l     F .text.itcm	00000060 rx_queue_transfer
+000038c4 l     F .text.itcm	00000060 rx_queue_transfer
 20200080 l     O .bss.dma	00001000 rx_buffer
-0000529c l     F .text.itcm	000000b4 rx_event
-00005350 l     F .text.itcm	00000090 usb_serial_flush_callback
+00003924 l     F .text.itcm	000000b4 rx_event
+000039d8 l     F .text.itcm	00000090 usb_serial_flush_callback
 20201080 l     O .bss.dma	00002000 txbuffer
-000053e0 l     F .text.itcm	000001b8 usb_serial_write.part.0
-20003d7c l     O .bss	00000004 rx_available
-20003d80 l     O .bss	00000010 rx_count
-20003deb l     O .bss	00000001 rx_head
-20003d90 l     O .bss	00000010 rx_index
-20003da0 l     O .bss	00000009 rx_list
-20003de0 l     O .bss	00000002 rx_packet_size
-20003dec l     O .bss	00000001 rx_tail
-20002300 l     O .bss	00000100 rx_transfer
-20003def l     O .bss	00000001 transmit_previous_timeout
-20003de2 l     O .bss	00000002 tx_available
-20003df0 l     O .bss	00000001 tx_head
-20003df1 l     O .bss	00000001 tx_noautoflush
-20003de4 l     O .bss	00000002 tx_packet_size
-20002400 l     O .bss	00000080 tx_transfer
+00003a68 l     F .text.itcm	000001b8 usb_serial_write.part.0
+20002af4 l     O .bss	00000004 rx_available
+20002af8 l     O .bss	00000010 rx_count
+20002b64 l     O .bss	00000001 rx_head
+20002b08 l     O .bss	00000010 rx_index
+20002b18 l     O .bss	00000009 rx_list
+20002b58 l     O .bss	00000002 rx_packet_size
+20002b65 l     O .bss	00000001 rx_tail
+20001b00 l     O .bss	00000100 rx_transfer
+20002b68 l     O .bss	00000001 transmit_previous_timeout
+20002b5a l     O .bss	00000002 tx_available
+20002b69 l     O .bss	00000001 tx_head
+20002b6a l     O .bss	00000001 tx_noautoflush
+20002b5c l     O .bss	00000002 tx_packet_size
+20001c00 l     O .bss	00000080 tx_transfer
 00000000 l    df *ABS*	00000000 yield.cpp
-20003de8 l     O .bss	00000001 yield::running
+20002b60 l     O .bss	00000001 yield::running
+00000000 l    df *ABS*	00000000 HardwareSerial.cpp
+00000000 l    df *ABS*	00000000 pwm.c
 00000000 l    df *ABS*	00000000 rtc.c
-00000000 l    df *ABS*	00000000 serialEvent.cpp
 00000000 l    df *ABS*	00000000 sm_pool.c
 00000000 l    df *ABS*	00000000 atexit_arm.o
 00000000 l    df *ABS*	00000000 libc_a-atol.o
@@ -178,16 +126,15 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 libc_a-reallocr.o
 00000000 l    df *ABS*	00000000 libc_a-strtod.o
 00000000 l    df *ABS*	00000000 libc_a-strtol.o
-00007444 l     F .text.itcm	00000144 _strtol_l.constprop.0
+0000631c l     F .text.itcm	00000144 _strtol_l.constprop.0
 00000000 l    df *ABS*	00000000 libc_a-utoa.o
 00000000 l    df *ABS*	00000000 libc_a-cxa_atexit.o
 00000000 l    df *ABS*	00000000 libc_a-efgcvt.o
-00000000 l    df *ABS*	00000000 libc_a-isspace.o
 00000000 l    df *ABS*	00000000 libc_a-tolower.o
 00000000 l    df *ABS*	00000000 libc_a-findfp.o
-0000767c l     F .text.itcm	00000018 stdio_exit_handler
-00007694 l     F .text.itcm	00000040 cleanup_stdio
-000076d4 l     F .text.itcm	000000d4 global_stdio_init.part.0
+00006544 l     F .text.itcm	00000018 stdio_exit_handler
+0000655c l     F .text.itcm	00000040 cleanup_stdio
+0000659c l     F .text.itcm	000000d4 global_stdio_init.part.0
 00000000 l    df *ABS*	00000000 libc_a-fwalk.o
 00000000 l    df *ABS*	00000000 libc_a-stdio.o
 00000000 l    df *ABS*	00000000 libc_a-memmove.o
@@ -196,8 +143,8 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 libc_a-strncmp.o
 00000000 l    df *ABS*	00000000 libc_a-strncpy.o
 00000000 l    df *ABS*	00000000 libc_a-strstr.o
-00007c28 l     F .text.itcm	000000c6 critical_factorization
-00007cf0 l     F .text.itcm	000001f8 two_way_long_needle
+00006af0 l     F .text.itcm	000000c6 critical_factorization
+00006bb8 l     F .text.itcm	000001f8 two_way_long_needle
 00000000 l    df *ABS*	00000000 libc_a-locale.o
 00000000 l    df *ABS*	00000000 libc_a-closer.o
 00000000 l    df *ABS*	00000000 libc_a-lseekr.o
@@ -215,7 +162,7 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 libc_a-__atexit.o
 00000000 l    df *ABS*	00000000 libc_a-freer.o
 00000000 l    df *ABS*	00000000 libc_a-gdtoa-gethex.o
-00008970 l     F .text.itcm	000000a4 rshift
+00007830 l     F .text.itcm	000000a4 rshift
 00000000 l    df *ABS*	00000000 libc_a-gdtoa-hexnan.o
 00000000 l    df *ABS*	00000000 libc_a-mbtowc_r.o
 00000000 l    df *ABS*	00000000 libc_a-mprec.o
@@ -230,13 +177,13 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 libc_a-assert.o
 00000000 l    df *ABS*	00000000 libc_a-callocr.o
 00000000 l    df *ABS*	00000000 libc_a-dtoa.o
-0000a128 l     F .text.itcm	00000126 quorem
+00008fe8 l     F .text.itcm	00000126 quorem
 00000000 l    df *ABS*	00000000 libc_a-wcrtomb.o
 00000000 l    df *ABS*	00000000 libc_a-wcsrtombs.o
 00000000 l    df *ABS*	00000000 libc_a-fiprintf.o
 00000000 l    df *ABS*	00000000 libc_a-vfiprintf.o
-0000afc8 l     F .text.itcm	00000076 __sprint_r.part.0
-0000bfcc l     F .text.itcm	00000080 __sbprintf
+00009e88 l     F .text.itcm	00000076 __sprint_r.part.0
+0000ae8c l     F .text.itcm	00000080 __sbprintf
 00000000 l    df *ABS*	00000000 libc_a-fvwrite.o
 00000000 l    df *ABS*	00000000 libc_a-wsetup.o
 00000000 l    df *ABS*	00000000 libc_a-fputwc.o
@@ -251,515 +198,417 @@ SYMBOL TABLE:
 00000000 l    df *ABS*	00000000 libc_a-ctype_.o
 00000000 l    df *ABS*	00000000 libc_a-impure.o
 00000000 l    df *ABS*	00000000 libc_a-__call_atexit.o
-0000cc10 l     F .text.itcm	00000008 ___reboot_Teensyduino__veneer
-0000cc18 l     F .text.itcm	00000008 ___ZN7TwoWire5beginEv_veneer
-0000cc20 l     F .text.itcm	00000008 ___init_veneer
-60001f88 l     F .text.code	00000008 ____libc_init_array_veneer
-60001f90 l     F .text.code	00000008 __delay_veneer
-60001f98 l     F .text.code	00000008 __set_arm_clock_veneer
-60001fa0 l     F .text.code	00000008 __sm_set_pool_veneer
-60001fa8 l     F .text.code	00000008 __pwm_init_veneer
-60001fb0 l     F .text.code	00000008 __usb_init_serialnumber_veneer
-60001fb8 l     F .text.code	00000008 __main_veneer
-60001fc0 l     F .text.code	00000008 __memset_veneer
-00000608 g     F .text.itcm	000004a4 PrintOutput()
-00000aac g     F .text.itcm	00000150 Set(String)
-000057ac g     F .text.itcm	00000018 usb_serial_available
-00003704 g     F .text.itcm	00000038 String::String(float, unsigned char)
-00009bcc g     F .text.itcm	00000062 __any_on
-0000c800 g     F .text.itcm	00000024 _isatty_r
-0000847c g     F .text.itcm	000000ba strcpy
-000036a4 g     F .text.itcm	0000002e String::String(int, unsigned char)
-000023e4 g     F .text.itcm	00000064 Adafruit_SPIDevice::endTransactionWithDeassertingCS()
-600017d8 g     F .text.code	00000002 startup_default_late_hook
-00008080 g     F .text.itcm	0000002c _lseek_r
-0000597c  w    F .text.itcm	000000f0 yield
-0000156c g     F .text.itcm	0000001c PA12::PA12(HardwareSerial*, int, bool)
-00001d60 g     F .text.itcm	0000001a Adafruit_BusIO_Register::Adafruit_BusIO_Register(Adafruit_I2CDevice*, unsigned short, unsigned char, unsigned char, unsigned char)
-20003ddc g     O .bss	00000004 usb_timer1_callback
-6000210c g     O .text.progmem	00000018 usb_string_manufacturer_name_default
-600018d8 g     F .text.code	00000384 configure_external_ram
-00001d3c g     F .text.itcm	00000022 Adafruit_INA260::conversionReady()
-20001d92 g     O .data	00000002 dacValue
-200029b8 g     O .bss	00000140 Wire1
-20001b1c g     O .data	00000004 dacStepSize
-0000cb40 g     F .text.itcm	0000005a .hidden __floatdidf
-600020e8  w    O .text.progmem	00000001 _serialEventUSB2_default
-20003154 g     O .bss	00000001 __lock___atexit_recursive_mutex
-600020f1 g     O .text.progmem	00000001 _serialEvent7_default
-0000af3c g     F .text.itcm	0000004c _wcrtomb_r
-60001654 g     F .text.code	00000034 TwoWire::configSDApin(unsigned char)
-000034e8 g     F .text.itcm	0000001c Print::println()
-00001434 g     F .text.itcm	000000ac TwoWire::isr()
-000078a8 g     F .text.itcm	00000020 __sseek
-000077a8 g     F .text.itcm	0000003c __sinit
-00009c4c g     F .text.itcm	000000a4 fcvtbuf
-0000468c  w    F .text.itcm	00000002 serialEvent5()
-0000c724 g     F .text.itcm	000000b0 __swbuf_r
-000038f8 g     F .text.itcm	00000058 String::substring(unsigned int) const
-00003824 g     F .text.itcm	0000001c String::append(char const*)
-00001a90 g     F .text.itcm	00000034 PA12::movingSpeed(int, int)
-00006130 g     F .text.itcm	0000000c __malloc_unlock
-200026f8 g     O .bss	00000060 Serial5
-00000bfc g     F .text.itcm	00000168 Toggle(String)
-60001f24 g     F .text.code	00000054 analog_init
-000039c8 g     F .text.itcm	00000058 String::trim()
-000001cc g     F .text.itcm	0000012c Help()
-00002058 g     F .text.itcm	00000070 Adafruit_I2CDevice::_read(unsigned char*, unsigned int, bool)
-200012b4 g     O .data	00000004 F_CPU_ACTUAL
-00003950 g     F .text.itcm	00000056 String::substring(unsigned int, unsigned int) const
-000078d0 g     F .text.itcm	000000f8 memmove
-00002a14 g     F .text.itcm	00000072 HardwareSerial::peek()
-00002448 g     F .text.itcm	000000b6 Adafruit_SPIDevice::write(unsigned char const*, unsigned int, unsigned char const*, unsigned int)
-000091bc g     F .text.itcm	0000004c _Balloc
-0000cc3c g       .ARM.exidx	00000000 __exidx_end
-20003de6 g     O .bss	00000001 EventResponder::runningFromYield
-20001bb4 g     O .data	00000080 isr_table_gpio2
-0000487c g     F .text.itcm	00000060 tempmonGetTemp
-0000344c g     F .text.itcm	00000050 Print::write(unsigned char const*, unsigned int)
-20001584 g     O .data	00000004 __atexit_recursive_mutex
-00005b70 g     F .text.itcm	00000008 atol
-00008128 g     F .text.itcm	0000000c __errno
+60001e40 l     F .text.code	00000008 __memset_veneer
+60001e48 l     F .text.code	00000008 ____libc_init_array_veneer
+60001e50 l     F .text.code	00000008 __delay_veneer
+60001e58 l     F .text.code	00000008 __set_arm_clock_veneer
+60001e60 l     F .text.code	00000008 __main_veneer
+60001e68 l     F .text.code	00000008 __sm_set_pool_veneer
+60001e70 l     F .text.code	00000008 __pwm_init_veneer
+60001e78 l     F .text.code	00000008 __usb_init_serialnumber_veneer
+0000bad0 l     F .text.itcm	00000008 ___reboot_Teensyduino__veneer
+0000bad8 l     F .text.itcm	00000008 ___init_veneer
+000003ac g     F .text.itcm	000004a4 PrintOutput()
+0000193c g     F .text.itcm	0000000c Adafruit_I2CDevice::setSpeed(unsigned long)
+00003e48 g     F .text.itcm	00000018 usb_serial_available
+00002130 g     F .text.itcm	00000036 String::String(float, unsigned char)
+00008a8c g     F .text.itcm	00000062 __any_on
+0000b6c0 g     F .text.itcm	00000024 _isatty_r
+0000733c g     F .text.itcm	000000ba strcpy
+000020d8 g     F .text.itcm	0000002c String::String(int, unsigned char)
+00001c0c g     F .text.itcm	00000064 Adafruit_SPIDevice::endTransactionWithDeassertingCS()
+6000167c g     F .text.code	00000002 startup_default_late_hook
+00006f48 g     F .text.itcm	0000002c _lseek_r
+00004018  w    F .text.itcm	000000d8 yield
+00001190 g     F .text.itcm	0000001c PA12::PA12(HardwareSerial*, int, bool)
+0000170c g     F .text.itcm	0000001a Adafruit_BusIO_Register::Adafruit_BusIO_Register(Adafruit_I2CDevice*, unsigned short, unsigned char, unsigned char, unsigned char)
+20002b54 g     O .bss	00000004 usb_timer1_callback
+60001ea0 g     O .text.progmem	00000018 usb_string_manufacturer_name_default
+60001794 g     F .text.code	00000384 configure_external_ram
+2000173e g     O .data	00000002 dacValue
+200016c8 g     O .data	00000004 dacStepSize
+0000ba00 g     F .text.itcm	0000005a .hidden __floatdidf
+20001ecc g     O .bss	00000001 __lock___atexit_recursive_mutex
+00009dfc g     F .text.itcm	0000004c _wcrtomb_r
+00001f10 g     F .text.itcm	0000001c Print::println()
+00006770 g     F .text.itcm	00000020 __sseek
+00006670 g     F .text.itcm	0000003c __sinit
+00008b0c g     F .text.itcm	000000a4 fcvtbuf
+0000b5e4 g     F .text.itcm	000000b0 __swbuf_r
+00002324 g     F .text.itcm	00000056 String::substring(unsigned int) const
+00002250 g     F .text.itcm	0000001c String::append(char const*)
+00005008 g     F .text.itcm	0000000c __malloc_unlock
+20002b5f g     O .bss	00000001 HardwareSerialIMXRT::s_count_serials_with_serial_events
+60001de0 g     F .text.code	00000054 analog_init
+00000110 g     F .text.itcm	0000011c Help()
+00001874 g     F .text.itcm	00000070 Adafruit_I2CDevice::_read(unsigned char*, unsigned int, bool)
+200010bc g     O .data	00000004 F_CPU_ACTUAL
+0000237c g     F .text.itcm	00000054 String::substring(unsigned int, unsigned int) const
+00006798 g     F .text.itcm	000000f8 memmove
+0000807c g     F .text.itcm	0000004c _Balloc
+0000baec g       .ARM.exidx	00000000 __exidx_end
+20002b5e g     O .bss	00000001 EventResponder::runningFromYield
+00002f04 g     F .text.itcm	00000060 tempmonGetTemp
+00001e74 g     F .text.itcm	00000050 Print::write(unsigned char const*, unsigned int)
+20001130 g     O .data	00000004 __atexit_recursive_mutex
+00004a48 g     F .text.itcm	00000008 atol
+00006ff0 g     F .text.itcm	0000000c __errno
+0000468c g     F .text.itcm	0000014a HardwareSerialIMXRT::IRQHandler()
 60001000 g     O .text.headers	00000020 ImageVectorTable
-00003704 g     F .text.itcm	00000038 String::String(float, unsigned char)
-000027f8  w    F .text.itcm	0000002c SPIClass::SPIClass(unsigned int, unsigned int)
-20002f98 g     O .bss	00000004 EventResponder::firstInterrupt
-000051cc g     F .text.itcm	00000004 usb_transfer_status
-000030b0 g     F .text.itcm	0000000c IRQHandler_Serial2
-00005ae0 g     F .text.itcm	00000084 sm_set_pool
-200032cc g     O .bss	00000004 __stdio_exit_handler
-20002578 g     O .bss	00000060 Serial1
-0000cb9c g     F .text.itcm	00000030 .hidden __aeabi_d2lz
-0000359c g     F .text.itcm	0000003a String::String(String const&)
-00005234  w    F .text.itcm	00000008 usb_serial_class::write(unsigned char const*, unsigned int)
-0000c7d4 g     F .text.itcm	0000002c _fstat_r
-20000c5c g     O .data	00000370 digital_pin_to_info_PGM
-200032e4 g     O .bss	00000004 errno
-000002f8 g     F .text.itcm	00000030 CreateFilter(unsigned int, int)
-60002048 g     O .text.progmem	00000050 TwoWire::i2c3_hardware
-0000cc38 g       .text.itcm	00000000 _etext
-0000271c g     F .text.itcm	000000dc _spi_dma_rxISR0()
-00001b00 g     F .text.itcm	00000060 irp_get_baudrate
-200022c0 g       .bss	00000000 _sbss
-00002500 g     F .text.itcm	000000c8 Adafruit_SPIDevice::write_then_read(unsigned char const*, unsigned int, unsigned char*, unsigned int, unsigned char)
-00004690  w    F .text.itcm	00000002 serialEvent6()
-000029ec g     F .text.itcm	00000026 HardwareSerial::available()
-00003e80 g     F .text.itcm	00000024 digitalRead
-600021fc g       *ABS*	00000000 _stextload
-00000e38 g     F .text.itcm	00000108 loop
-0000450c g     F .text.itcm	0000007a flexpwm_init
-000032c0 g     F .text.itcm	0000000c IRQHandler_Serial6
-600017dc g     F .text.code	00000004 startup_debug_reset
-00005090 g     F .text.itcm	00000064 usb_config_rx
-0000467c  w    F .text.itcm	00000002 serialEvent1()
-00002ec8 g     F .text.itcm	00000004 HardwareSerial::write(unsigned char)
-000011f8 g     F .text.itcm	000000fc TwoWire::endTransmission(unsigned char)
-000015f4 g     F .text.itcm	00000040 PA12::readRaw()
-20002f94 g     O .bss	00000004 EventResponder::lastInterrupt
-00004020 g     F .text.itcm	00000134 memcpy
-00008fe0 g     F .text.itcm	000001b0 __hexnan
-200022c0 g     O .data	00000000 .hidden __TMC_END__
-20003d68 g     O .bss	00000004 printTimer
-00001f58 g     F .text.itcm	0000001a Adafruit_BusIO_RegisterBits::read()
-0000cac8 g     F .text.itcm	00000022 .hidden __floatsidf
-20003dc4 g     O .bss	00000004 systick_millis_count
-000011b8 g     F .text.itcm	00000040 TwoWire::wait_idle()
-20003df3 g     O .bss	00000001 usb_configuration
-00005a94 g     F .text.itcm	0000004c sm_align_pool
+00002130 g     F .text.itcm	00000036 String::String(float, unsigned char)
+20001d10 g     O .bss	00000004 EventResponder::firstInterrupt
+00003854 g     F .text.itcm	00000004 usb_transfer_status
+000049b8 g     F .text.itcm	00000084 sm_set_pool
+20001d18 g     O .bss	00000020 HardwareSerialIMXRT::s_serials_with_serial_events
+20002044 g     O .bss	00000004 __stdio_exit_handler
+200010d0 g     O .data	00000060 Serial1
+0000ba5c g     F .text.itcm	00000030 .hidden __aeabi_d2lz
+00002000 g     F .text.itcm	00000038 String::String(String const&)
+000038bc  w    F .text.itcm	00000008 usb_serial_class::write(unsigned char const*, unsigned int)
+0000b694 g     F .text.itcm	0000002c _fstat_r
+20000ae0 g     O .data	00000370 digital_pin_to_info_PGM
+2000205c g     O .bss	00000004 errno
+0000022c g     F .text.itcm	00000030 CreateFilter(unsigned int, int)
+0000bae8 g       .text.itcm	00000000 _etext
+20001ac0 g       .bss	00000000 _sbss
+00001c70 g     F .text.itcm	000000c8 Adafruit_SPIDevice::write_then_read(unsigned char const*, unsigned int, unsigned char*, unsigned int, unsigned char)
+000027fc g     F .text.itcm	00000024 digitalRead
+60001f90 g       *ABS*	00000000 _stextload
+00000bdc g     F .text.itcm	00000100 loop
+000047d8 g     F .text.itcm	0000007a flexpwm_init
+60001680 g     F .text.code	00000004 startup_debug_reset
+00003718 g     F .text.itcm	00000064 usb_config_rx
+000009a4 g     F .text.itcm	00000134 Toggle(String&)
+00000e94 g     F .text.itcm	00000100 TwoWire::endTransmission(unsigned char)
+000011ac g     F .text.itcm	00000040 PA12::readRaw()
+20001d0c g     O .bss	00000004 EventResponder::lastInterrupt
+00002830 g     F .text.itcm	00000134 memcpy
+00007ea0 g     F .text.itcm	000001b0 __hexnan
+20001ac0 g     O .data	00000000 .hidden __TMC_END__
+20002ae0 g     O .bss	00000004 printTimer
+0000b988 g     F .text.itcm	00000022 .hidden __floatsidf
+20002b3c g     O .bss	00000004 systick_millis_count
+00000e54 g     F .text.itcm	00000040 TwoWire::wait_idle()
+000045ac g     F .text.itcm	000000dc HardwareSerialIMXRT::write9bit(unsigned long)
+000042d0 g     F .text.itcm	0000029c HardwareSerialIMXRT::begin(unsigned long, unsigned short)
+20002b6c g     O .bss	00000001 usb_configuration
+0000496c g     F .text.itcm	0000004c sm_align_pool
 60000000 g     O .text.headers	00000200 FlexSPI_NOR_Config
-00001fb8 g     F .text.itcm	00000036 Adafruit_I2CDevice::begin(bool)
-00007668 g     F .text.itcm	00000014 tolower
-00004680  w    F .text.itcm	00000002 serialEvent2()
-00009b0c g     F .text.itcm	00000062 __ratio
-6000210c  w    O .text.progmem	00000018 usb_string_manufacturer_name
-00001e6c g     F .text.itcm	0000009e Adafruit_BusIO_Register::read(unsigned char*, unsigned char)
-00005ba4 g     F .text.itcm	00000010 malloc
-60001ff8 g     O .text.progmem	00000050 TwoWire::i2c1_hardware
-0000485c  w    F .text.itcm	0000000a _fstat
-00000fa0  w    F .text.itcm	0000001e TwoWire::read()
-0000a070 g     F .text.itcm	00000040 __assert_func
-000025c8  w    F .text.itcm	00000016 EventResponder::triggerEvent(int, void*)
+00006530 g     F .text.itcm	00000014 tolower
+000089cc g     F .text.itcm	00000062 __ratio
+00000850 g     F .text.itcm	00000154 Set(String&)
+60001ea0  w    O .text.progmem	00000018 usb_string_manufacturer_name
+00001728 g     F .text.itcm	0000009e Adafruit_BusIO_Register::read(unsigned char*, unsigned char)
+00004a7c g     F .text.itcm	00000010 malloc
+00002ee4  w    F .text.itcm	0000000a _fstat
+00000d2c  w    F .text.itcm	0000001e TwoWire::read()
+00008f30 g     F .text.itcm	00000040 __assert_func
 200002a8 g     O .data	000000c8 __mprec_tens
-60001de8 g     F .text.code	000000e8 usb_init
-000036a4 g     F .text.itcm	0000002e String::String(int, unsigned char)
-20003190 g     O .bss	00000004 __malloc_top_pad
-200024d8 g     O .bss	00000050 SPI1
-20003dc8 g     O .bss	00000004 systick_safe_read
-000010b0 g     F .text.itcm	00000108 TwoWire::force_clock()
+60001ca4 g     F .text.code	000000e8 usb_init
+000020d8 g     F .text.itcm	0000002c String::String(int, unsigned char)
+20001f08 g     O .bss	00000004 __malloc_top_pad
+20002b40 g     O .bss	00000004 systick_safe_read
+00000d4c g     F .text.itcm	00000108 TwoWire::force_clock()
 aaaaaaaf g       *ABS*	00000000 _flexram_bank_config
-20001d74 g     O .data	00000004 resistanceTrackingInterval
-2000158c g     O .data	00000000 .hidden __dso_handle
-00005b78 g     F .text.itcm	0000002c itoa
-0000caa8 g     F .text.itcm	0000001e .hidden __aeabi_ui2d
-00009fc0 g     F .text.itcm	00000008 _localeconv_r
-600020f0 g     O .text.progmem	00000001 _serialEvent6_default
-0000c04c g     F .text.itcm	000002f4 __sfvwrite_r
-00009410 g     F .text.itcm	0000005c __i2b
+20001720 g     O .data	00000004 resistanceTrackingInterval
+20001138 g     O .data	00000000 .hidden __dso_handle
+00004a50 g     F .text.itcm	0000002c itoa
+0000b968 g     F .text.itcm	0000001e .hidden __aeabi_ui2d
+00008e80 g     F .text.itcm	00000008 _localeconv_r
+0000af0c g     F .text.itcm	000002f4 __sfvwrite_r
+000082d0 g     F .text.itcm	0000005c __i2b
 20000000 g       .data	00000000 _sdata
-6000218c g     O .text.progmem	00000062 usb_config_descriptor_480
-0000c824 g     F .text.itcm	00000000 .hidden __aeabi_drsub
-000080d8 g     F .text.itcm	00000024 _sbrk_r
-000020c8 g     F .text.itcm	00000056 Adafruit_I2CDevice::write_then_read(unsigned char const*, unsigned int, unsigned char*, unsigned int, bool)
-600017d0 g     F .text.code	00000002 startup_default_early_hook
-60001624 g     F .text.code	00000030 ResetHandler
-00005834 g     F .text.itcm	00000020 usb_serial_getchar
-20003dcc g     O .bss	00000008 usb_cdc_line_coding
-00003e2c g     F .text.itcm	00000054 digitalWrite
-20002f9c g     O .bss	00000004 EventResponder::lastYield
-0000154c g     F .text.itcm	00000010 PA12::~PA12()
-000080ac g     F .text.itcm	0000002c _read_r
-00007658 g     F .text.itcm	00000010 isspace
-00009cf0 g     F .text.itcm	000000c6 _fclose_r
-200032e8 g     O .bss	00000010 extmem_smalloc_pool
-20003188 g     O .bss	00000004 __malloc_max_sbrked_mem
-00003ea4 g     F .text.itcm	00000070 pinMode
-0000389c g     F .text.itcm	00000036 String::getBytes(unsigned char*, unsigned int, unsigned int) const
-0000caec g     F .text.itcm	00000042 .hidden __extendsfdf2
-600020e9  w    O .text.progmem	00000001 _serialEventUSB1_default
-0000c830 g     F .text.itcm	00000276 .hidden __adddf3
-60001688 g     F .text.code	00000054 TwoWire::setSDA(unsigned char)
-20002af8 g     O .bss	00000140 Wire2
-00000d64 g     F .text.itcm	000000d4 ProcessCommand(String)
-60011400 g     O .text.csf	00000c00 hab_csf
+60001f20 g     O .text.progmem	00000062 usb_config_descriptor_480
+0000b6e4 g     F .text.itcm	00000000 .hidden __aeabi_drsub
+00006fa0 g     F .text.itcm	00000024 _sbrk_r
+000018e4 g     F .text.itcm	00000056 Adafruit_I2CDevice::write_then_read(unsigned char const*, unsigned int, unsigned char*, unsigned int, bool)
+60001674 g     F .text.code	00000002 startup_default_early_hook
+6000164c g     F .text.code	00000028 ResetHandler
+00003ed0 g     F .text.itcm	00000020 usb_serial_getchar
+20002b44 g     O .bss	00000008 usb_cdc_line_coding
+000027a8 g     F .text.itcm	00000054 digitalWrite
+20001d14 g     O .bss	00000004 EventResponder::lastYield
+00001170 g     F .text.itcm	00000010 PA12::~PA12()
+00006f74 g     F .text.itcm	0000002c _read_r
+00008bb0 g     F .text.itcm	000000c6 _fclose_r
+20002060 g     O .bss	00000010 extmem_smalloc_pool
+20001f00 g     O .bss	00000004 __malloc_max_sbrked_mem
+000022c8 g     F .text.itcm	00000036 String::getBytes(unsigned char*, unsigned int, unsigned int) const
+00004114 g     F .text.itcm	00000026 HardwareSerialIMXRT::available()
+0000b9ac g     F .text.itcm	00000042 .hidden __extendsfdf2
+0000b6f0 g     F .text.itcm	00000276 .hidden __adddf3
+6000f800 g     O .text.csf	00000c00 hab_csf
 20280000 g       .text.csf	00000000 _heap_end
-00009974 g     F .text.itcm	000000c2 __b2d
-0000cc34 g       .ARM.exidx	00000000 __exidx_start
+00008834 g     F .text.itcm	000000c2 __b2d
+0000bae4 g       .ARM.exidx	00000000 __exidx_start
 70000000 g       .bss.extram	00000000 _extram_end
-00004868  w    F .text.itcm	00000004 _isatty
-20002f90 g     O .bss	00000004 EventResponder::firstYield
-00006154 g     F .text.itcm	000003d8 _realloc_r
-00001f74 g     F .text.itcm	00000030 Adafruit_BusIO_RegisterBits::write(unsigned long)
-00008134 g     F .text.itcm	00000048 __libc_init_array
-000041c0 g     F .text.itcm	0000034c dtostrf
-00000f94  w    F .text.itcm	0000000c TwoWire::available()
-20000914 g     O .data	00000100 __hexdig
-20001b34 g     O .data	00000080 isr_table_gpio1
-0000c4b8 g     F .text.itcm	00000066 _fputwc_r
-000027f8  w    F .text.itcm	0000002c SPIClass::SPIClass(unsigned int, unsigned int)
+00002ef0  w    F .text.itcm	00000004 _isatty
+20001d08 g     O .bss	00000004 EventResponder::firstYield
+000040f0  w    F .text.itcm	00000004 HardwareSerialIMXRT::operator bool()
+0000502c g     F .text.itcm	000003d8 _realloc_r
+00006ffc g     F .text.itcm	00000048 __libc_init_array
+000029cc g     F .text.itcm	0000034c dtostrf
+20000690 g     O .data	00000030 vtable for HardwareSerialIMXRT
+20000798 g     O .data	00000100 __hexdig
+0000b378 g     F .text.itcm	00000066 _fputwc_r
 20000280 g     O .data	00000028 __mprec_bigtens
-000092c0 g     F .text.itcm	000000b0 __s2b
-00004874  w    F .text.itcm	00000004 abort
-000012f4 g     F .text.itcm	00000140 TwoWire::requestFrom(unsigned char, unsigned char, unsigned char)
-00005228  w    F .text.itcm	00000004 usb_serial_class::clear()
-0000caa8 g     F .text.itcm	0000001e .hidden __floatunsidf
-0000481c  w    F .text.itcm	00000034 _sbrk
-6000ee38 g       *ABS*	00000000 _sdataload
-00009778 g     F .text.itcm	00000042 __mcmp
-00003f18 g     F .text.itcm	000000f8 attachInterrupt
-20001588 g     O .data	00000004 __brkval
-20003df2 g     O .bss	00000001 usb_cdc_line_rtsdtr
-0000381c g     F .text.itcm	00000008 String::append(String const&)
-60001f78 g     F .text.code	00000000 _init
-00005598 g     F .text.itcm	00000002 usb_serial_reset
-2000067c g     O .data	00000070 SPIClass::spiclass_lpspi1_hardware
-00003604 g     F .text.itcm	0000000e String::~String()
-00007588 g     F .text.itcm	0000001c strtol
-00009f9c g     F .text.itcm	00000024 strnlen
-0000359c g     F .text.itcm	0000003a String::String(String const&)
-000033c8 g     F .text.itcm	0000000c IRQHandler_Serial8
-0000cbd0 g     F .text.itcm	00000040 .hidden __aeabi_d2ulz
-00003860 g     F .text.itcm	00000010 operator+(StringSumHelper const&, String const&)
-60002128 g     O .text.progmem	00000062 usb_config_descriptor_12
-00000020 g     F .text.itcm	000000bc irq_gpio6789
-20000828 g     O .data	00000024 vtable for TwoWire
-00006530 g     F .text.itcm	00000e70 _strtod_l
-00008fa8 g     F .text.itcm	00000036 __match
-20003e20 g       .bss	00000000 _ebss
-20002638 g     O .bss	00000060 Serial3
-00001fa4 g     F .text.itcm	00000012 Adafruit_I2CDevice::Adafruit_I2CDevice(unsigned char, TwoWire*)
-600016dc g     F .text.code	00000034 TwoWire::configSCLpin(unsigned char)
-000029cc g     F .text.itcm	00000020 HardwareSerial::availableForWrite()
-0000379c g     F .text.itcm	0000007e String::append(char const*, unsigned int)
-00009370 g     F .text.itcm	00000040 __hi0bits
-000014ec g     F .text.itcm	0000000c lpi2c3_isr()
+00008180 g     F .text.itcm	000000b0 __s2b
+00002efc  w    F .text.itcm	00000004 abort
+00000f94 g     F .text.itcm	00000160 TwoWire::requestFrom(unsigned char, unsigned char, unsigned char)
+000038b0  w    F .text.itcm	00000004 usb_serial_class::clear()
+0000b968 g     F .text.itcm	0000001e .hidden __floatunsidf
+00002ea4  w    F .text.itcm	00000034 _sbrk
+6000da7c g       *ABS*	00000000 _sdataload
+00008638 g     F .text.itcm	00000042 __mcmp
+20001134 g     O .data	00000004 __brkval
+20002b6b g     O .bss	00000001 usb_cdc_line_rtsdtr
+00002248 g     F .text.itcm	00000008 String::append(String const&)
+60001e34 g     F .text.code	00000000 _init
+00003c20 g     F .text.itcm	00000002 usb_serial_reset
+00002060 g     F .text.itcm	0000000e String::~String()
+00006460 g     F .text.itcm	0000001c strtol
+00008e5c g     F .text.itcm	00000024 strnlen
+00002000 g     F .text.itcm	00000038 String::String(String const&)
+0000ba90 g     F .text.itcm	00000040 .hidden __aeabi_d2ulz
+0000228c g     F .text.itcm	00000010 operator+(StringSumHelper const&, String const&)
+60001ebc g     O .text.progmem	00000062 usb_config_descriptor_12
+00005408 g     F .text.itcm	00000e70 _strtod_l
+00007e68 g     F .text.itcm	00000036 __match
+20002ba0 g       .bss	00000000 _ebss
+000021c8 g     F .text.itcm	0000007e String::append(char const*, unsigned int)
+00008230 g     F .text.itcm	00000040 __hi0bits
 20203080 g       .bss.dma	00000000 _heap_start
-20003158 g     O .bss	00000001 __lock___malloc_recursive_mutex
-60002098 g     O .text.progmem	00000050 TwoWire::i2c4_hardware
-00003614 g     F .text.itcm	00000066 String::copy(char const*, unsigned int)
-20003194 g     O .bss	00000138 __sf
-00001cd8 g     F .text.itcm	00000034 Adafruit_INA260::readBusVoltage()
+20001ed0 g     O .bss	00000001 __lock___malloc_recursive_mutex
+00002070 g     F .text.itcm	00000066 String::copy(char const*, unsigned int)
+20001f0c g     O .bss	00000138 __sf
+000016a8 g     F .text.itcm	00000034 Adafruit_INA260::readBusVoltage()
 00000002 g       *ABS*	00000000 _itcm_block_count
-00002874 g     F .text.itcm	00000002 Adafruit_MCP4725::Adafruit_MCP4725()
-00002df0 g     F .text.itcm	000000d8 HardwareSerial::write9bit(unsigned long)
-200022e0 g     O .bss	00000020 endpoint0_transfer_data
-20003dee g     O .bss	00000001 trackResistance
-00004158 g     F .text.itcm	00000004 operator delete(void*, unsigned int)
-00004588 g     F .text.itcm	000000f4 pwm_init
-0000c830 g     F .text.itcm	00000276 .hidden __aeabi_dadd
-00001044  w    F .text.itcm	0000006c TwoWire::TwoWire(IMXRT_LPI2C_t*, TwoWire::I2C_Hardware_t const&)
-00002b1c g     F .text.itcm	0000001a HardwareSerial::flush()
-00003604 g     F .text.itcm	0000000e String::~String()
-60012000 g       .text.csf	00000000 __text_csf_end
-60001c5c g     F .text.code	0000005c usb_pll_start
-000095c8 g     F .text.itcm	000000c0 __pow5mult
-0000cb30 g     F .text.itcm	0000006a .hidden __aeabi_ul2d
-000014f8 g     F .text.itcm	0000000c lpi2c4_isr()
-00001044  w    F .text.itcm	0000006c TwoWire::TwoWire(IMXRT_LPI2C_t*, TwoWire::I2C_Hardware_t const&)
-200022c0 g     O .bss	00000020 endpoint0_transfer_ack
-20003dd4 g     O .bss	00000004 usb_cdc_line_rtsdtr_millis
-00005188 g     F .text.itcm	00000028 usb_transmit
-00002878 g     F .text.itcm	00000010 Adafruit_MCP4725::begin(unsigned char)
-00001ac4 g     F .text.itcm	0000003c PA12::presentPosition(int)
-000029ac g     F .text.itcm	00000020 systick_isr
-00008188 g     F .text.itcm	00000002 __retarget_lock_release_recursive
-000036d4 g     F .text.itcm	0000002e String::String(unsigned long, unsigned char)
-200012b8 g     O .data	00000010 Serial
-00003030 g     F .text.itcm	0000000c IRQHandler_Serial1
-0000373c g     F .text.itcm	0000000e String::operator=(String const&)
-200007cc g     O .data	00000024 vtable for HardwareSerial
-00001564  w    F .text.itcm	00000006 usb_serial_class::write(unsigned char)
-600017d0  w    F .text.code	00000002 startup_early_hook
-200032f8 g     O .bss	00000010 ina260
-00005768 g     F .text.itcm	00000044 usb_serial_peekchar
-00003134 g     F .text.itcm	0000000c IRQHandler_Serial3
-00001e14 g     F .text.itcm	00000058 Adafruit_BusIO_Register::write(unsigned long, unsigned char)
-00000188 g     F .text.itcm	00000044 MatchCommand(String)
-20000818 g     O .data	00000010 vtable for PA12
-000077e4 g     F .text.itcm	0000000c __sfp_lock_acquire
-00009fd0 g     F .text.itcm	00000000 memchr
-00003a40 g     F .text.itcm	000002f0 set_arm_clock
-20003dc0 g     O .bss	00000004 systick_cycle_count
-20001d7c g     O .data	00000016 usb_string_serial_number_default
-00008764 g     F .text.itcm	0000020c _free_r
-00001690 g     F .text.itcm	000000c4 PA12::txPacket(int, int, int)
-00008050 g     F .text.itcm	0000000c __locale_mb_cur_max
-000018e8 g     F .text.itcm	00000174 PA12::txRxPacket(int, int, int)
-0000af88 g     F .text.itcm	00000016 _wcsrtombs_r
-20002fc4 g     O .bss	00000190 __atexit0
-000035d8 g     F .text.itcm	0000002a String::String(String&&)
-0000522c  w    F .text.itcm	00000004 usb_serial_class::flush()
-0000c82c g     F .text.itcm	0000027a .hidden __aeabi_dsub
-0000323c g     F .text.itcm	0000000c IRQHandler_Serial5
-20001b04 g     O .data	00000004 __malloc_sbrk_base
-00001560  w    F .text.itcm	00000004 usb_serial_class::read()
-00007ee8 g     F .text.itcm	00000168 strstr
-0000cb30 g     F .text.itcm	0000006a .hidden __floatundidf
-0000486c  w    F .text.itcm	00000006 _lseek
-00009688 g     F .text.itcm	000000f0 __lshift
-00005158 g     F .text.itcm	00000030 usb_prepare_transfer
-0000469c g     F .text.itcm	00000180 unused_interrupt_vector
-20003dd8 g     O .bss	00000004 usb_timer0_callback
-60001cb8 g     F .text.code	00000130 tempmon_init
-00004688  w    F .text.itcm	00000002 serialEvent4()
-00000124 g     F .text.itcm	00000064 NextArg(String&)
-00005a90  w    F .text.itcm	00000002 serialEvent()
-0000863c g     F .text.itcm	00000088 __register_exitproc
-00001ba8 g     F .text.itcm	00000002 Adafruit_INA260::Adafruit_INA260()
-0000374c g     F .text.itcm	0000002a String::operator=(String&&)
-00007b38 g     F .text.itcm	0000008a strncmp
-000057c4 g     F .text.itcm	00000070 usb_serial_flush_input
-00001a5c g     F .text.itcm	00000034 PA12::goalPosition(int, int)
-600020ee g     O .text.progmem	00000001 _serialEvent4_default
-0000946c g     F .text.itcm	0000015c __multiply
-00005854 g     F .text.itcm	0000002c usb_serial_putchar
+00001da0 g     F .text.itcm	00000006 Adafruit_MCP4725::Adafruit_MCP4725()
+20001ae0 g     O .bss	00000020 endpoint0_transfer_data
+20002b67 g     O .bss	00000001 trackResistance
+00002964 g     F .text.itcm	00000004 operator delete(void*, unsigned int)
+00004854 g     F .text.itcm	000000f4 pwm_init
+0000b6f0 g     F .text.itcm	00000276 .hidden __aeabi_dadd
+00002060 g     F .text.itcm	0000000e String::~String()
+60010400 g       .text.csf	00000000 __text_csf_end
+60001b18 g     F .text.code	0000005c usb_pll_start
+00008488 g     F .text.itcm	000000c0 __pow5mult
+0000b9f0 g     F .text.itcm	0000006a .hidden __aeabi_ul2d
+20001ac0 g     O .bss	00000020 endpoint0_transfer_ack
+20002b4c g     O .bss	00000004 usb_cdc_line_rtsdtr_millis
+00003810 g     F .text.itcm	00000028 usb_transmit
+00001630 g     F .text.itcm	0000003c PA12::presentPosition(int)
+00001e48 g     F .text.itcm	00000020 systick_isr
+00007050 g     F .text.itcm	00000002 __retarget_lock_release_recursive
+00002104 g     F .text.itcm	0000002c String::String(unsigned long, unsigned char)
+200010c0 g     O .data	00000010 Serial
+00001e68 g     F .text.itcm	0000000c IRQHandler_Serial1
+00002168 g     F .text.itcm	0000000e String::operator=(String const&)
+00001188  w    F .text.itcm	00000006 usb_serial_class::write(unsigned char)
+60001674  w    F .text.code	00000002 startup_early_hook
+20002070 g     O .bss	00000010 ina260
+00003e04 g     F .text.itcm	00000044 usb_serial_peekchar
+000000cc g     F .text.itcm	00000044 MatchCommand(String)
+00000ad8 g     F .text.itcm	00000104 ProcessCommand(String&)
+200006c0 g     O .data	00000010 vtable for PA12
+000066ac g     F .text.itcm	0000000c __sfp_lock_acquire
+00008e90 g     F .text.itcm	00000000 memchr
+00002410 g     F .text.itcm	000002f0 set_arm_clock
+20002b38 g     O .bss	00000004 systick_cycle_count
+20001728 g     O .data	00000016 usb_string_serial_number_default
+00007624 g     F .text.itcm	0000020c _free_r
+00001230 g     F .text.itcm	000000c4 PA12::txPacket(int, int, int)
+00006f18 g     F .text.itcm	0000000c __locale_mb_cur_max
+00001488 g     F .text.itcm	00000174 PA12::txRxPacket(int, int, int)
+00009e48 g     F .text.itcm	00000016 _wcsrtombs_r
+00004268 g     F .text.itcm	00000068 HardwareSerialIMXRT::end()
+00004688 g     F .text.itcm	00000004 HardwareSerialIMXRT::write(unsigned char)
+20001d3c g     O .bss	00000190 __atexit0
+00002038 g     F .text.itcm	00000028 String::String(String&&)
+000038b4  w    F .text.itcm	00000004 usb_serial_class::flush()
+0000b6ec g     F .text.itcm	0000027a .hidden __aeabi_dsub
+200016b0 g     O .data	00000004 __malloc_sbrk_base
+00001184  w    F .text.itcm	00000004 usb_serial_class::read()
+00006db0 g     F .text.itcm	00000168 strstr
+0000b9f0 g     F .text.itcm	0000006a .hidden __floatundidf
+00002ef4  w    F .text.itcm	00000006 _lseek
+00008548 g     F .text.itcm	000000f0 __lshift
+000037e0 g     F .text.itcm	00000030 usb_prepare_transfer
+0000413c g     F .text.itcm	0000007a HardwareSerialIMXRT::peek()
+00002d18 g     F .text.itcm	0000018c unused_interrupt_vector
+20002b50 g     O .bss	00000004 usb_timer0_callback
+60001b74 g     F .text.code	00000130 tempmon_init
+00000068 g     F .text.itcm	00000064 NextArg(String&)
+000074fc g     F .text.itcm	00000088 __register_exitproc
+0000166c g     F .text.itcm	00000002 Adafruit_INA260::Adafruit_INA260()
+00002178 g     F .text.itcm	0000002a String::operator=(String&&)
+00006a00 g     F .text.itcm	0000008a strncmp
+00003e60 g     F .text.itcm	00000070 usb_serial_flush_input
+000015fc g     F .text.itcm	00000034 PA12::goalPosition(int, int)
+0000832c g     F .text.itcm	0000015c __multiply
+00003ef0 g     F .text.itcm	0000002c usb_serial_putchar
 00000025 g       *ABS*	00000000 _teensy_model_identifier
-00007bc4 g     F .text.itcm	00000064 strncpy
-20003160 g     O .bss	00000028 __malloc_current_mallinfo
-2000075c g     O .data	00000070 SPIClass::spiclass_lpspi4_hardware
-00009a38 g     F .text.itcm	000000d4 __d2b
-20002fa0 g     O .bss	00000020 HardwareSerial::s_serials_with_serial_events
-00001ba8 g     F .text.itcm	00000002 Adafruit_INA260::Adafruit_INA260()
-60001ed0 g     F .text.code	00000054 _reboot_Teensyduino_
-600017d4 g     F .text.code	00000002 startup_default_middle_hook
-00001ca0 g     F .text.itcm	00000036 Adafruit_INA260::readCurrent()
-0000613c g     F .text.itcm	00000018 realloc
-00001754 g     F .text.itcm	00000194 PA12::rxPacket(int)
-00004a60 g     F .text.itcm	00000630 usb_isr
-00007640 g     F .text.itcm	0000000c __cxa_atexit
-0000805c g     F .text.itcm	00000024 _close_r
-0000cac8 g     F .text.itcm	00000022 .hidden __aeabi_i2d
-20002488 g     O .bss	00000050 SPI
-20001c34 g     O .data	00000080 isr_table_gpio3
-600020ed g     O .text.progmem	00000001 _serialEvent3_default
-00009f3c g     F .text.itcm	00000060 memcmp
-200007f0  w    O .data	00000028 vtable for usb_serial_class
-0000367c g     F .text.itcm	00000026 String::String(char const*)
-00008180 g     F .text.itcm	00000002 __retarget_lock_close_recursive
-20002758 g     O .bss	00000060 Serial6
-00001548 g     F .text.itcm	00000002 PA12::~PA12()
-20003dbc g     O .bss	00000004 scale_cpu_cycles_to_microseconds
-20002528 g     O .bss	00000050 SPI2
-0000c340 g     F .text.itcm	000000cc __swsetup_r
-00004698  w    F .text.itcm	00000002 serialEvent8()
-600020eb g     O .text.progmem	00000001 _serialEvent1_default
-00009b70 g     F .text.itcm	0000005c __copybits
-200016fc g     O .data	00000408 __malloc_av_
-20002fc0 g     O .bss	00000004 __atexit
-00007844 g     F .text.itcm	00000022 __sread
-000058e8 g     F .text.itcm	00000094 usb_serial_flush_output
-00006124 g     F .text.itcm	0000000c __malloc_lock
-20002000 g     O .data	000002c0 _VectorsRam
-00009ee8 g     F .text.itcm	00000054 _fflush_r
-0000a0b0 g     F .text.itcm	00000078 _calloc_r
-00003870 g     F .text.itcm	0000002c String::equals(char const*) const
-000075a4 g     F .text.itcm	0000009c __utoa
-0000164c g     F .text.itcm	00000044 PA12::clearBuffer()
-20001d95 g     O .data	00000001 yield_active_check_flags
-00008184 g     F .text.itcm	00000002 __retarget_lock_acquire_recursive
-20003df4 g     O .bss	00000001 usb_high_speed
-000079c8 g     F .text.itcm	000000a4 memset
-00004010 g     F .text.itcm	00000010 main
-2000318c g     O .bss	00000004 __malloc_max_total_mem
-00001634 g     F .text.itcm	00000018 PA12::available()
-0000817c g     F .text.itcm	00000002 __retarget_lock_init_recursive
+00006a8c g     F .text.itcm	00000064 strncpy
+000041b8 g     F .text.itcm	00000092 HardwareSerialIMXRT::read()
+20001ed8 g     O .bss	00000028 __malloc_current_mallinfo
+000088f8 g     F .text.itcm	000000d4 __d2b
+0000166c g     F .text.itcm	00000002 Adafruit_INA260::Adafruit_INA260()
+60001d8c g     F .text.code	00000054 _reboot_Teensyduino_
+60001678 g     F .text.code	00000002 startup_default_middle_hook
+00001670 g     F .text.itcm	00000036 Adafruit_INA260::readCurrent()
+00005014 g     F .text.itcm	00000018 realloc
+000012f4 g     F .text.itcm	00000194 PA12::rxPacket(int)
+000030e8 g     F .text.itcm	00000630 usb_isr
+00006518 g     F .text.itcm	0000000c __cxa_atexit
+00006f24 g     F .text.itcm	00000024 _close_r
+0000b988 g     F .text.itcm	00000022 .hidden __aeabi_i2d
+00008dfc g     F .text.itcm	00000060 memcmp
+20000668  w    O .data	00000028 vtable for usb_serial_class
+00001fc4 g     F .text.itcm	0000003a String::String(char const*)
+00007048 g     F .text.itcm	00000002 __retarget_lock_close_recursive
+0000116c g     F .text.itcm	00000002 PA12::~PA12()
+20002b34 g     O .bss	00000004 scale_cpu_cycles_to_microseconds
+0000b200 g     F .text.itcm	000000cc __swsetup_r
+00008a30 g     F .text.itcm	0000005c __copybits
+200012a8 g     O .data	00000408 __malloc_av_
+20001d38 g     O .bss	00000004 __atexit
+0000670c g     F .text.itcm	00000022 __sread
+00003f84 g     F .text.itcm	00000094 usb_serial_flush_output
+00004ffc g     F .text.itcm	0000000c __malloc_lock
+0000424c g     F .text.itcm	0000001a HardwareSerialIMXRT::flush()
+20001800 g     O .data	000002c0 _VectorsRam
+00008da8 g     F .text.itcm	00000054 _fflush_r
+00008f70 g     F .text.itcm	00000078 _calloc_r
+0000229c g     F .text.itcm	0000002c String::equals(char const*) const
+0000647c g     F .text.itcm	0000009c __utoa
+000011ec g     F .text.itcm	00000044 PA12::clearBuffer()
+20002b6f g     O .bss	00000001 yield_active_check_flags
+0000704c g     F .text.itcm	00000002 __retarget_lock_acquire_recursive
+20002b6d g     O .bss	00000001 usb_high_speed
+00006890 g     F .text.itcm	000000a4 memset
+00002820 g     F .text.itcm	00000010 main
+20001f04 g     O .bss	00000004 __malloc_max_total_mem
+00007044 g     F .text.itcm	00000002 __retarget_lock_init_recursive
 20200000 g     O .bss.dma	00000062 usb_descriptor_buffer
-20001d70 g     O .data	00000004 printTimerInterval
-000078c8 g     F .text.itcm	00000008 __sclose
-000051d0 g     F .text.itcm	00000058 usb_init_serialnumber
-60001ff8 g       .text.code	00000000 __init_array_end
-0000a250 g     F .text.itcm	00000cec _dtoa_r
-00005bc4 g     F .text.itcm	00000560 _malloc_r
-20003de7 g     O .bss	00000001 HardwareSerial::s_count_serials_with_serial_events
-00009c30 g     F .text.itcm	0000001a __ascii_wctomb
-00003a20 g     F .text.itcm	0000000a String::toInt() const
-0000cb40 g     F .text.itcm	0000005a .hidden __aeabi_l2d
-000039a8 g     F .text.itcm	0000001e String::toLowerCase()
-00001fa4 g     F .text.itcm	00000012 Adafruit_I2CDevice::Adafruit_I2CDevice(unsigned char, TwoWire*)
-2000084c  w    O .data	00000010 SPIClass::beginTransaction(SPISettings)::clk_sel
-000028e0 g     F .text.itcm	00000084 EventResponder::triggerEventNotImmediate()
-00002824 g     F .text.itcm	00000008 SPIClass::transfer(void const*, void*, unsigned int)
-00003dd8 g     F .text.itcm	00000054 micros
-000038d4 g     F .text.itcm	00000022 String::indexOf(String const&) const
-00001f50 g     F .text.itcm	00000008 Adafruit_BusIO_RegisterBits::Adafruit_BusIO_RegisterBits(Adafruit_BusIO_Register*, unsigned char, unsigned char)
-000086c4 g     F .text.itcm	000000a0 _malloc_trim_r
-0000c520 g     F .text.itcm	00000106 _wcsnrtombs_l
-60002124 g     O .text.progmem	00000004 string0
-00005880 g     F .text.itcm	00000018 usb_serial_write
-600017d8  w    F .text.code	00000002 startup_late_hook
-0000155c  w    F .text.itcm	00000004 usb_serial_class::available()
-000081a8 g     F .text.itcm	000002dc strcmp
-600020ea  w    O .text.progmem	00000001 _serialEvent_default
+2000171c g     O .data	00000004 printTimerInterval
+00001da8 g     F .text.itcm	00000058 Adafruit_MCP4725::setVoltage(unsigned short, bool, unsigned long)
+00006790 g     F .text.itcm	00000008 __sclose
+00003858 g     F .text.itcm	00000058 usb_init_serialnumber
+60001e88 g       .text.code	00000000 __init_array_end
+00009110 g     F .text.itcm	00000cec _dtoa_r
+00004a9c g     F .text.itcm	00000560 _malloc_r
+00008af0 g     F .text.itcm	0000001a __ascii_wctomb
+000023f0 g     F .text.itcm	0000000a String::toInt() const
+0000ba00 g     F .text.itcm	0000005a .hidden __aeabi_l2d
+000023d0 g     F .text.itcm	0000001e String::toLowerCase()
+200006d0  w    O .data	00000010 SPIClass::beginTransaction(SPISettings)::clk_sel
+00001d98 g     F .text.itcm	00000008 SPIClass::transfer(void const*, void*, unsigned int)
+00002300 g     F .text.itcm	00000022 String::indexOf(String const&) const
+000010f4 g     F .text.itcm	00000078 TwoWire::setClock(unsigned long)
+00007584 g     F .text.itcm	000000a0 _malloc_trim_r
+0000b3e0 g     F .text.itcm	00000106 _wcsnrtombs_l
+60001eb8 g     O .text.progmem	00000004 string0
+00003f1c g     F .text.itcm	00000018 usb_serial_write
+6000167c  w    F .text.code	00000002 startup_late_hook
+00001180  w    F .text.itcm	00000004 usb_serial_class::available()
+00007068 g     F .text.itcm	000002dc strcmp
 20000000 g     O .data	00000280 endpoint_queue_head
-600020f4  w    O .text.progmem	00000016 usb_string_product_name
-00001ff0 g     F .text.itcm	00000068 Adafruit_I2CDevice::write(unsigned char const*, unsigned int, bool, unsigned char const*, unsigned int)
-00001bac g     F .text.itcm	000000f4 Adafruit_INA260::begin(unsigned char, TwoWire*)
-00003d30 g     F .text.itcm	000000a8 delay
-0000cbd0 g     F .text.itcm	00000040 .hidden __fixunsdfdi
-0000cc30 g     F .fini	00000000 _fini
-00003778 g     F .text.itcm	00000022 String::operator=(char const*)
-00000fdc g     F .text.itcm	0000002a TwoWire::write(unsigned char)
+60001e88  w    O .text.progmem	00000016 usb_string_product_name
+0000180c g     F .text.itcm	00000068 Adafruit_I2CDevice::write(unsigned char const*, unsigned int, bool, unsigned char const*, unsigned int)
+00002700 g     F .text.itcm	000000a8 delay
+0000ba90 g     F .text.itcm	00000040 .hidden __fixunsdfdi
+0000bae0 g     F .fini	00000000 _fini
+000021a4 g     F .text.itcm	00000022 String::operator=(char const*)
 60001020 g     O .text.headers	0000000c BootData
-00004878 g     F .text.itcm	00000004 Panic_Temp_isr
-0000cb9c g     F .text.itcm	00000030 .hidden __fixdfdi
-000073a0 g     F .text.itcm	000000a4 strtof
-0000c628 g     F .text.itcm	00000024 _wcsnrtombs_r
-000080fc g     F .text.itcm	0000002c _write_r
-00001d60 g     F .text.itcm	0000001a Adafruit_BusIO_Register::Adafruit_BusIO_Register(Adafruit_I2CDevice*, unsigned short, unsigned char, unsigned char, unsigned char)
-000035d8 g     F .text.itcm	0000002a String::String(String&&)
-0000367c g     F .text.itcm	00000026 String::String(char const*)
-00008630 g     F .text.itcm	0000000c nanf
-20001b18 g     O .data	00000004 _impure_ptr
-00009db8 g     F .text.itcm	00000130 __sflush_r
-20002878 g     O .bss	00000140 Wire
-000077fc g     F .text.itcm	00000046 _fwalk_sglue
-60001fc8 g       .text.code	00000000 __preinit_array_end
-20001d78 g     O .data	00000004 targetResistance
-00009190 g     F .text.itcm	0000002a __ascii_mbtowc
-00009910 g     F .text.itcm	00000064 __ulp
-00004a34 g     F .text.itcm	0000002c usb_stop_sof_interrupts
-00000fc0  w    F .text.itcm	00000018 TwoWire::peek()
-00002ecc g     F .text.itcm	00000164 HardwareSerial::IRQHandler()
-00000fd8  w    F .text.itcm	00000002 TwoWire::flush()
-000003f0 g     F .text.itcm	00000218 setup
-200010fc g     O .data	00000084 usb_descriptor_list
-00001588 g     F .text.itcm	0000006a PA12::begin(int)
-200032d0 g     O .bss	00000001 dac
-20003d78 g     O .bss	00000004 rpm_filter
-00008620 g     F .text.itcm	00000010 nan
+00002f00 g     F .text.itcm	00000004 Panic_Temp_isr
+0000ba5c g     F .text.itcm	00000030 .hidden __fixdfdi
+00006278 g     F .text.itcm	000000a4 strtof
+0000b4e8 g     F .text.itcm	00000024 _wcsnrtombs_r
+00006fc4 g     F .text.itcm	0000002c _write_r
+0000170c g     F .text.itcm	0000001a Adafruit_BusIO_Register::Adafruit_BusIO_Register(Adafruit_I2CDevice*, unsigned short, unsigned char, unsigned char, unsigned char)
+00002038 g     F .text.itcm	00000028 String::String(String&&)
+00001fc4 g     F .text.itcm	0000003a String::String(char const*)
+000074f0 g     F .text.itcm	0000000c nanf
+200016c4 g     O .data	00000004 _impure_ptr
+00008c78 g     F .text.itcm	00000130 __sflush_r
+000066c4 g     F .text.itcm	00000046 _fwalk_sglue
+60001e80 g       .text.code	00000000 __preinit_array_end
+20001724 g     O .data	00000004 targetResistance
+00008050 g     F .text.itcm	0000002a __ascii_mbtowc
+000087d0 g     F .text.itcm	00000064 __ulp
+000030bc g     F .text.itcm	0000002c usb_stop_sof_interrupts
+000002f0 g     F .text.itcm	000000bc setup
+20000f04 g     O .data	00000084 usb_descriptor_list
+20002048 g     O .bss	00000004 dac
+20002af0 g     O .bss	00000004 rpm_filter
+000074e0 g     F .text.itcm	00000010 nan
 20070000 g       .text.csf	00000000 _estack
-00005898 g     F .text.itcm	00000050 usb_serial_write_buffer_free
-00004694  w    F .text.itcm	00000002 serialEvent7()
-60001710 g     F .text.code	00000058 TwoWire::setSCL(unsigned char)
-600020f2 g     O .text.progmem	00000001 _serialEvent8_default
-20001b0c g     O .data	0000000c __sglue
-0000559c g     F .text.itcm	000000ec usb_serial_configure
-00001008 g     F .text.itcm	0000003c TwoWire::write(unsigned char const*, unsigned int)
-00003504  w    F .text.itcm	0000001c _write
-200022c0 g       .data	00000000 _edata
-20002818 g     O .bss	00000060 Serial8
-20003dea g     O .bss	00000001 external_psram_size
-00000328 g     F .text.itcm	0000001c Insert(Filter*, int)
-000003d8 g     F .text.itcm	00000018 RPM_Interrupt()
-0000c40c g     F .text.itcm	000000aa __fputwc
-00005230  w    F .text.itcm	00000004 usb_serial_class::availableForWrite()
-000014e0 g     F .text.itcm	0000000c lpi2c1_isr()
-20003308 g     O .bss	00000a48 myServo
-00002b38 g     F .text.itcm	00000040 nvic_execution_priority()
-20001cb4 g     O .data	00000080 isr_table_gpio4
-0000415c g     F .text.itcm	00000062 ultoa
-60001768 g     F .text.code	00000068 TwoWire::begin()
-000031b8 g     F .text.itcm	0000000c IRQHandler_Serial4
-00003a2c g     F .text.itcm	00000014 String::toFloat() const
-00007868 g     F .text.itcm	0000003e __swrite
-00004154 g     F .text.itcm	00000004 operator new(unsigned int)
-00002964 g     F .text.itcm	00000044 EventResponder::runFromInterrupt()
-00003524 g     F .text.itcm	00000078 Stream::readStringUntil(char, unsigned int)
-20001b08 g     O .data	00000004 __malloc_trim_threshold
-00003520  w    F .text.itcm	00000004 usb_serial_class::peek()
-0000764c g     F .text.itcm	0000000a fcvtf
-0000afa0 g     F .text.itcm	00000028 fiprintf
-0000b040 g     F .text.itcm	00000f8c _vfiprintf_r
-000022d4  w    F .text.itcm	00000110 SPIClass::beginTransaction(SPISettings)
-00001f50 g     F .text.itcm	00000008 Adafruit_BusIO_RegisterBits::Adafruit_BusIO_RegisterBits(Adafruit_BusIO_Register*, unsigned char, unsigned char)
-000097bc g     F .text.itcm	00000154 __mdiff
-00001548 g     F .text.itcm	00000002 PA12::~PA12()
-00002a88 g     F .text.itcm	00000092 HardwareSerial::read()
-200006ec g     O .data	00000070 SPIClass::spiclass_lpspi3_hardware
-00002640 g     F .text.itcm	000000dc _spi_dma_rxISR1()
-20001190 g     O .data	00000120 _impure_data
-000077f0 g     F .text.itcm	0000000c __sfp_lock_release
-600020ec g     O .text.progmem	00000001 _serialEvent2_default
-00001d0c g     F .text.itcm	00000030 Adafruit_INA260::readPower()
-000036d4 g     F .text.itcm	0000002e String::String(unsigned long, unsigned char)
-0000156c g     F .text.itcm	0000001c PA12::PA12(HardwareSerial*, int, bool)
-20002698 g     O .bss	00000060 Serial4
-20000a98 g     O .data	00000101 _ctype_
-00004850  w    F .text.itcm	00000004 _read
-60001fc8 g       .text.code	00000000 __init_array_start
-200012b0 g     O .data	00000004 F_BUS_ACTUAL
-00002888 g     F .text.itcm	00000058 Adafruit_MCP4725::setVoltage(unsigned short, bool)
-0000c64c g     F .text.itcm	000000d8 __smakebuf_r
+00003f34 g     F .text.itcm	00000050 usb_serial_write_buffer_free
+200016b8 g     O .data	0000000c __sglue
+00003c24 g     F .text.itcm	00000100 usb_serial_configure
+00001f2c  w    F .text.itcm	0000001c _write
+20001ac0 g       .data	00000000 _edata
+20002b62 g     O .bss	00000001 external_psram_size
+0000b2cc g     F .text.itcm	000000aa __fputwc
+000038b8  w    F .text.itcm	00000004 usb_serial_class::availableForWrite()
+20002080 g     O .bss	00000a48 myServo
+0000456c g     F .text.itcm	00000040 nvic_execution_priority()
+00002968 g     F .text.itcm	00000062 ultoa
+000023fc g     F .text.itcm	00000014 String::toFloat() const
+00006730 g     F .text.itcm	0000003e __swrite
+00001e00 g     F .text.itcm	00000044 EventResponder::runFromInterrupt()
+00001f4c g     F .text.itcm	00000078 Stream::readStringUntil(char, unsigned int)
+200016b4 g     O .data	00000004 __malloc_trim_threshold
+00001f48  w    F .text.itcm	00000004 usb_serial_class::peek()
+00006524 g     F .text.itcm	0000000a fcvtf
+00009e60 g     F .text.itcm	00000028 fiprintf
+00009f00 g     F .text.itcm	00000f8c _vfiprintf_r
+00001afc  w    F .text.itcm	00000110 SPIClass::beginTransaction(SPISettings)
+0000867c g     F .text.itcm	00000154 __mdiff
+0000116c g     F .text.itcm	00000002 PA12::~PA12()
+20000f98 g     O .data	00000120 _impure_data
+000066b8 g     F .text.itcm	0000000c __sfp_lock_release
+000016dc g     F .text.itcm	00000030 Adafruit_INA260::readPower()
+00002104 g     F .text.itcm	0000002c String::String(unsigned long, unsigned char)
+00001190 g     F .text.itcm	0000001c PA12::PA12(HardwareSerial*, int, bool)
+2000091c g     O .data	00000101 _ctype_
+00002ed8  w    F .text.itcm	00000004 _read
+60001e80 g       .text.code	00000000 __init_array_start
+200010b8 g     O .data	00000004 F_BUS_ACTUAL
+0000b50c g     F .text.itcm	000000d8 __smakebuf_r
 00000000 g       .text.itcm	00000000 _stext
-00008540 g     F .text.itcm	000000dc strlen
-200027b8 g     O .bss	00000060 Serial7
-00008a14 g     F .text.itcm	00000594 __gethex
-600020f4 g     O .text.progmem	00000016 usb_string_product_name_default
-00007a6c g     F .text.itcm	000000cc strchr
-600017d4  w    F .text.code	00000002 startup_middle_hook
-0000349c g     F .text.itcm	0000004c Print::print(String const&)
-0000caec g     F .text.itcm	00000042 .hidden __aeabi_f2d
-600017e0 g     F .text.code	000000f8 configure_cache
-20003d74 g     O .bss	00000004 resistanceTracingTimer
-20001d94 g     O .data	00000001 printOutput
-00001d7c g     F .text.itcm	00000096 Adafruit_BusIO_Register::write(unsigned char*, unsigned char)
-00002b78 g     F .text.itcm	00000278 HardwareSerial::begin(unsigned long, unsigned short)
-0000c82c g     F .text.itcm	0000027a .hidden __subdf3
-00001f0c g     F .text.itcm	00000042 Adafruit_BusIO_Register::read()
-60001fc8 g       .text.code	00000000 __preinit_array_start
-000051b0 g     F .text.itcm	0000001c usb_receive
-00003840 g     F .text.itcm	0000001e String::append(char)
-000093b0 g     F .text.itcm	00000060 __lo0bits
-00012000 g       *ABS*	00000000 _flashimagelen
-600020ef g     O .text.progmem	00000001 _serialEvent5_default
-00004684  w    F .text.itcm	00000002 serialEvent3()
-00005b64 g     F .text.itcm	0000000a __aeabi_atexit
-00005a6c g     F .text.itcm	00000024 rtc_get
+00007400 g     F .text.itcm	000000dc strlen
+000078d4 g     F .text.itcm	00000594 __gethex
+60001e88 g     O .text.progmem	00000016 usb_string_product_name_default
+00006934 g     F .text.itcm	000000cc strchr
+000040f4 g     F .text.itcm	00000020 HardwareSerialIMXRT::availableForWrite()
+60001678  w    F .text.code	00000002 startup_middle_hook
+00001ec4 g     F .text.itcm	0000004c Print::print(String const&)
+0000b9ac g     F .text.itcm	00000042 .hidden __aeabi_f2d
+60001684 g     F .text.code	00000110 configure_cache
+20002aec g     O .bss	00000004 resistanceTracingTimer
+20002b63 g     O .bss	00000001 printOutput
+0000b6ec g     F .text.itcm	0000027a .hidden __subdf3
+000017c8 g     F .text.itcm	00000042 Adafruit_BusIO_Register::read()
+60001e80 g       .text.code	00000000 __preinit_array_start
+00003838 g     F .text.itcm	0000001c usb_receive
+0000226c g     F .text.itcm	0000001e String::append(char)
+00008270 g     F .text.itcm	00000060 __lo0bits
+00010400 g       *ABS*	00000000 _flashimagelen
+00004a3c g     F .text.itcm	0000000a __aeabi_atexit
+00004948 g     F .text.itcm	00000024 rtc_get
 70000000 g       .bss.extram	00000000 _extram_start
-000029a8 g     F .text.itcm	00000004 pendablesrvreq_isr
-00001b60 g     F .text.itcm	00000048 SoftwareSerial::begin(unsigned long)
-00000f90  w    F .text.itcm	00000004 Print::availableForWrite()
-20001590 g     O .data	0000016c __global_locale
-00003344 g     F .text.itcm	0000000c IRQHandler_Serial7
-00005688 g     F .text.itcm	000000e0 usb_serial_read
-2000315c g     O .bss	00000001 __lock___sfp_recursive_mutex
-00002874 g     F .text.itcm	00000002 Adafruit_MCP4725::Adafruit_MCP4725()
-000050f4 g     F .text.itcm	00000064 usb_config_tx
-00004854  w    F .text.itcm	00000006 _close
-00005bb4 g     F .text.itcm	00000010 free
-00000348 g     F .text.itcm	00000090 GetRpmBuffered(Filter*)
-0000921c g     F .text.itcm	000000a4 __multadd
-00009208 g     F .text.itcm	00000012 _Bfree
-200025d8 g     O .bss	00000060 Serial2
-20001d7c  w    O .data	00000016 usb_string_serial_number
+00001e44 g     F .text.itcm	00000004 pendablesrvreq_isr
+2000113c g     O .data	0000016c __global_locale
+00003d24 g     F .text.itcm	000000e0 usb_serial_read
+20001ed4 g     O .bss	00000001 __lock___sfp_recursive_mutex
+00001da0 g     F .text.itcm	00000006 Adafruit_MCP4725::Adafruit_MCP4725()
+0000377c g     F .text.itcm	00000064 usb_config_tx
+00002edc  w    F .text.itcm	00000006 _close
+00004a8c g     F .text.itcm	00000010 free
+00000260 g     F .text.itcm	00000090 GetRpmBuffered(Filter*)
+000080dc g     F .text.itcm	000000a4 __multadd
+000080c8 g     F .text.itcm	00000012 _Bfree
+20001728  w    O .data	00000016 usb_string_serial_number
 
 
