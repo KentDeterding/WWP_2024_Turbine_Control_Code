@@ -1,11 +1,11 @@
-#line 1 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\commands.cpp"
+#line 1 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\commands.cpp"
 #include <Arduino.h>
 #include "types.h"
 
 // Get the next argument from a string and remove it
-String NextArg(String* command) {
-    String arg = (*command).substring(0, (*command).indexOf(" "));
-    *command = (*command).substring((*command).indexOf(" ") + 1);
+String NextArg(String &command) {
+    String arg = command.substring(0, command.indexOf(" "));
+    command = command.substring(command.indexOf(" ") + 1);
     return arg;
 }
 

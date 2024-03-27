@@ -2,9 +2,9 @@
 #include "types.h"
 
 // Get the next argument from a string and remove it
-String NextArg(String* command) {
-    String arg = (*command).substring(0, (*command).indexOf(" "));
-    *command = (*command).substring((*command).indexOf(" ") + 1);
+String NextArg(String &command) {
+    String arg = command.substring(0, command.indexOf(" "));
+    command = command.substring(command.indexOf(" ") + 1);
     return arg;
 }
 
