@@ -1,5 +1,5 @@
 #include <Arduino.h>
-#line 1 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 1 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 #include <Wire.h>
 #include <PA12.h>
 #include <Adafruit_INA260.h>
@@ -36,26 +36,26 @@ unsigned long resistanceTrackingInterval = 100;
 // Global State
 bool trackResistance = false;
 int dacStepSize = 100;
-bool printOutput = true;
+bool printOutput = false;
 
 
-#line 40 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 40 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup();
-#line 96 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 99 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void loop();
-#line 135 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 138 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 String PadString(String str);
-#line 142 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 145 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void PrintOutput();
-#line 157 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
-void ProcessCommand(String serialInput);
-#line 179 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
-void Set(String command);
-#line 198 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
-void Toggle(String command);
-#line 220 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 160 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+void ProcessCommand(String &serialInput);
+#line 187 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+void Set(String &command);
+#line 206 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+void Toggle(String &command);
+#line 227 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void RPM_Interrupt();
-#line 40 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
+#line 40 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\src.ino"
 void setup () {
     Serial.begin(9600);
     while (!Serial) { // Wait so serial monitor can be opened
@@ -64,6 +64,7 @@ void setup () {
     Serial.println("Starting up...");
     bool success = true;
 
+    /*
     // Saftey Switch
     pinMode(Safety_Switch_Pin, INPUT);
 
@@ -71,12 +72,12 @@ void setup () {
     myServo.begin(32);
     delay(100);
     if (myServo.available()) {
+        myServo.movingSpeed(LA_ID_NUM, 750);
         Serial.println("Linear actuator ready");
     } else {
         Serial.println("Linear actuator error");
         success = false;
     }
-    myServo.movingSpeed(LA_ID_NUM, 750);
 
     //INA260
     ina260.begin(0x40);
@@ -105,6 +106,8 @@ void setup () {
     } else {
         Serial.println("Setup failed");
     }
+
+    */
 
     Serial.println("Type \"help\" for a list of commands");
 
@@ -173,10 +176,16 @@ void PrintOutput () {
     Serial.println("\tRPM:         " + PadString(String(GetRpmBuffered(rpm_filter))));
 }
 
-void ProcessCommand (String serialInput) {
-    String command = NextArg(serialInput);
+void ProcessCommand (String &serialInput) {
+    String test = "set dac 100";
+    Serial.println(NextArg(test));
+    Serial.println(NextArg(test));
+    Serial.println(NextArg(test));
 
-    switch (MatchCommand(command)) {
+    String command = serialInput;
+    String cmd = NextArg(command);
+
+    switch (MatchCommand(cmd)) {
         case Command::INVALID:
             Serial.println("Invalid command: try \"help\"");
             break;
@@ -187,7 +196,6 @@ void ProcessCommand (String serialInput) {
             Set(command);
             break;
         case Command::TOGGLE:
-            Serial.println("Toggle command");
             Toggle(command);
             break;
         default:
@@ -195,7 +203,7 @@ void ProcessCommand (String serialInput) {
     }
 }
 
-void Set(String command) {
+void Set(String &command) {
     String arg = NextArg(command).toLowerCase();
     
     if (arg == "dac") {
@@ -214,13 +222,9 @@ void Set(String command) {
     }
 }
 
-void Toggle(String command) {
+void Toggle(String &command) {
     String arg = NextArg(command).toLowerCase();
-    Serial.println(command);
-    Serial.println(command.substring(command.indexOf(" ") + 1).trim());
-    arg = command.substring(command.indexOf(" ") + 1).trim();
-    Serial.println(arg);
-    arg = "pcc";
+    Serial.println("Toggling " + arg);
 
     if (arg == "pcc") {
         digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
@@ -233,6 +237,9 @@ void Toggle(String command) {
         Serial.println("Invalid subcommand for switch");
         Serial.println("Try \"help\"");
     }
+
+    arg = NextArg(command).toLowerCase();
+    Serial.println("Toggling " + arg);
 }
 
 // Interrupt for measuring the RPM
