@@ -1,4 +1,4 @@
-#line 1 "C:\\Users\\Kent4\\Projects\\Wildcat_Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\filter.cpp"
+#line 1 "C:\\Users\\Kent4\\Projects\\Wind_Power\\WWP_2024_Turbine_Control_Code\\src\\filter.cpp"
 #include <stdlib.h>
 
 struct Filter {
@@ -58,7 +58,7 @@ double GetRpmBuffered(struct Filter* filter) {
     
     double period = (high - low) / (filter->size - 3);
     period = period / 1000000; // convert us -> s
-    double rpm = 60/ period;
+    double rpm = 60 / period;
     return rpm / (double)filter->peaks_per_rotation;
 }
 

@@ -33,8 +33,8 @@ unsigned long resistanceTrackingInterval = 100;
 
 // Global State
 bool trackResistance = false;
-int dacStepSize = 100;
-bool printOutput = false;
+int dacStepSize = 20;
+bool printOutput = true;
 
 
 void setup () {
@@ -128,6 +128,11 @@ void loop () {
         } else {
             dacValue -= dacStepSize;
         }
+        if (dacValue > 4095) {
+            dacValue = 4095;
+        } else if (dacValue < 0) {
+            dacValue = 0;
+        }
         dac.setVoltage(dacValue, false);
     }
 }
@@ -140,18 +145,35 @@ String PadString (String str) {
 }
 
 void PrintOutput () {
-    Serial.print("\n\n\n");
-    Serial.println("Time:          \t" + PadString(String(millis())));
     String relayState = digitalRead(PCC_Relay_Pin) ? "High" : "Low";
-    Serial.println("\tRelay State: " + PadString(relayState));
-    String turbineVoltage = digitalRead(30) ? "High" : "Low";
-    Serial.println("\tT-Side Volt: " + PadString(turbineVoltage));
-    Serial.println("\tLA Position: " + PadString(String(myServo.presentPosition(LA_ID_NUM))));
-    Serial.println("\tDac:         " + PadString(String(dacValue)));
-    Serial.println("\tCurrent:     " + PadString(String(ina260.readCurrent())));
-    Serial.println("\tVoltage:     " + PadString(String(ina260.readBusVoltage())));
-    Serial.println("\tPower:       " + PadString(String(ina260.readPower())));
-    Serial.println("\tRPM:         " + PadString(String(GetRpmBuffered(rpm_filter))));
+    String turbineVoltage = digitalRead(30) ? "off" : "on";
+    String relayStateStr = PadString(relayState);
+    String safetySwitchStr = PadString(digitalRead(Safety_Switch_Pin) ? "open" : "closed"); // Should shutdown when closed
+    String turbineVoltageStr = PadString(turbineVoltage);
+    String laPosStr = PadString(String(myServo.presentPosition(LA_ID_NUM)));
+    String dacValStr = PadString(String(dacValue));
+    String resistanceStr = PadString(String(ina260.readBusVoltage() / ina260.readCurrent()));
+    String currentStr = PadString(String(ina260.readCurrent()));
+    String voltStr = PadString(String(ina260.readBusVoltage()));
+    String powerStr = PadString(String(ina260.readPower()));
+    String rpmStr = PadString(String(GetRpmBuffered(rpm_filter)));
+    Serial.print("\n\n\n");
+    Serial.println("Time:                " + PadString(String(millis())));
+    Serial.println("\tRelay State: " + relayStateStr);
+    Serial.println("\tSafety:      " + safetySwitchStr);
+    Serial.println("\tT-Status:    " + turbineVoltageStr);
+    Serial.println("\tLA Position: " + laPosStr);
+    if (trackResistance) {
+        Serial.println("\tTarget Res:  " + PadString(String(targetResistance)));
+    } else {
+        Serial.println("\tTarget Res:       N/A");
+    }
+    Serial.println("\tDac:         " + dacValStr);
+    Serial.println("\tResistance:  " + resistanceStr);
+    Serial.println("\tCurrent:     " + currentStr);
+    Serial.println("\tVoltage:     " + voltStr);
+    Serial.println("\tPower:       " + powerStr);
+    Serial.println("\tRPM:         " + rpmStr);
 }
 
 void ProcessCommand (String &serialInput) {

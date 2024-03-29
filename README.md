@@ -1,8 +1,6 @@
 # WWP_2024_Turbine_Control_Code
  
 # to-do
-- T - relay control
-- T - Read RPM
 - T - MPPT for Load
 - Safety Switch
 - PCC Disconnect

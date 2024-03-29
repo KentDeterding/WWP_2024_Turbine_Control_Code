@@ -57,7 +57,7 @@ double GetRpmBuffered(struct Filter* filter) {
     
     double period = (high - low) / (filter->size - 3);
     period = period / 1000000; // convert us -> s
-    double rpm = 60/ period;
+    double rpm = 60 / period;
     return rpm / (double)filter->peaks_per_rotation;
 }
 

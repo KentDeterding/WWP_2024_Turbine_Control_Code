@@ -2,6 +2,6 @@
     "sketch": "src\\src.ino",
     "configuration": "usb=serial,speed=600,opt=o2std,keys=en-us",
     "board": "teensy:avr:teensy41",
-    "port": "COM5",
+    "port": "COM4",
     "output": "build\\src.ino.hex"
 }
