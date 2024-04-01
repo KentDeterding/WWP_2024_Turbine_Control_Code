@@ -27,7 +27,7 @@ struct Filter* rpm_filter = CreateFilter(10, 8);
 
 // Timers
 unsigned long printTimer;
-unsigned long printTimerInterval = 1000;
+unsigned long printTimerInterval = 30; // was 1000, but I want to see the limit
 unsigned long resistanceTracingTimer;
 unsigned long resistanceTrackingInterval = 100;
 
@@ -115,6 +115,12 @@ void loop () {
 
     // Track load resistance
     if (resistanceTracingTimer < millis() && trackResistance) {
+
+        // Dac val -> Load Current is a linear relationship
+        // I(Dac value) = m(Dac value) + b
+        // m = 1.59404
+        // b = 2.53791
+
         resistanceTracingTimer += resistanceTrackingInterval;
 
         float voltage = ina260.readBusVoltage();
@@ -145,6 +151,7 @@ String PadString (String str) {
 }
 
 void PrintOutput () {
+    Serial.print("\n\n\n"); // Use betfore data once to see how long accessing the peripherials takes
     String relayState = digitalRead(PCC_Relay_Pin) ? "High" : "Low";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
@@ -152,12 +159,13 @@ void PrintOutput () {
     String turbineVoltageStr = PadString(turbineVoltage);
     String laPosStr = PadString(String(myServo.presentPosition(LA_ID_NUM)));
     String dacValStr = PadString(String(dacValue));
-    String resistanceStr = PadString(String(ina260.readBusVoltage() / ina260.readCurrent()));
-    String currentStr = PadString(String(ina260.readCurrent()));
-    String voltStr = PadString(String(ina260.readBusVoltage()));
+    float current = ina260.readCurrent();
+    float voltage = ina260.readBusVoltage();
+    String resistanceStr = PadString(String(voltage / current));
+    String currentStr = PadString(String(current));
+    String voltStr = PadString(String(voltage));
     String powerStr = PadString(String(ina260.readPower()));
     String rpmStr = PadString(String(GetRpmBuffered(rpm_filter)));
-    Serial.print("\n\n\n");
     Serial.println("Time:                " + PadString(String(millis())));
     Serial.println("\tRelay State: " + relayStateStr);
     Serial.println("\tSafety:      " + safetySwitchStr);
