@@ -28,14 +28,20 @@ struct Filter* rpm_filter = CreateFilter(10, 8);
 // Timers
 unsigned long printTimer;
 unsigned long printTimerInterval = 30; // was 1000, but I want to see the limit
-unsigned long resistanceTracingTimer;
+unsigned long resistanceTrackingTimer;
 unsigned long resistanceTrackingInterval = 100;
+unsigned long mpptTimer;
+unsigned long mpptInterval = 250;
+unsigned long sweepTimer;
+unsigned long sweepInterval = 500;
 
 // Global State
 bool trackResistance = false;
 int dacStepSize = 20;
 bool printOutput = true;
-
+bool mpptEnabled = false;
+float last_power = 0;
+bool sweepDac = false;
 
 void setup () {
     Serial.begin(9600);
@@ -90,7 +96,7 @@ void setup () {
     Serial.println("Type \"help\" for a list of commands");
 
     printTimer = millis();
-    resistanceTracingTimer = millis();
+    resistanceTrackingTimer = millis();
 }
 
 void loop () {
@@ -114,14 +120,13 @@ void loop () {
 */
 
     // Track load resistance
-    if (resistanceTracingTimer < millis() && trackResistance) {
+    if (resistanceTrackingTimer < millis() && trackResistance) {
+        resistanceTrackingTimer += resistanceTrackingInterval;
 
         // Dac val -> Load Current is a linear relationship
-        // I(Dac value) = m(Dac value) + b
-        // m = 1.59404
-        // b = 2.53791
-
-        resistanceTracingTimer += resistanceTrackingInterval;
+        // Current(mA) = m*dacValue + b
+        const float m = 1.59404;
+        const float b = 2.53791;
 
         float voltage = ina260.readBusVoltage();
         float current = ina260.readCurrent();
@@ -134,10 +139,45 @@ void loop () {
         } else {
             dacValue -= dacStepSize;
         }
+
         if (dacValue > 4095) {
             dacValue = 4095;
         } else if (dacValue < 0) {
             dacValue = 0;
+        }
+        dac.setVoltage(dacValue, false);
+
+        //float targetCurrent = voltage / targetResistance;
+        //dacValue = (targetCurrent - b) / m;
+        //dac.setVoltage(dacValue, false);
+    }
+
+    if (mpptTimer < millis() && mpptEnabled) {
+        mpptTimer += mpptInterval;
+
+        float voltage = ina260.readBusVoltage();
+        float current = ina260.readCurrent();
+        float power = voltage * current;
+
+        if (power > last_power) {
+            dacValue += dacStepSize;
+        } else {
+            dacValue -= dacStepSize;
+        }
+
+        last_power = power;
+        dac.setVoltage(dacValue, false);
+    }
+
+    // Just a testing fuction to get some data
+    if (sweepTimer < millis() && sweepDac) {
+        sweepTimer += sweepInterval;
+
+        dacValue += 20;
+        if (dacValue > 4095) {
+            dacValue = 4095;
+            sweepDac = false;
+            trackResistance = true;
         }
         dac.setVoltage(dacValue, false);
     }
@@ -151,7 +191,7 @@ String PadString (String str) {
 }
 
 void PrintOutput () {
-    Serial.print("\n\n\n"); // Use betfore data once to see how long accessing the peripherials takes
+    Serial.print("\n\n\n"); // Use before data once to see how long accessing the peripherials takes
     String relayState = digitalRead(PCC_Relay_Pin) ? "High" : "Low";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
@@ -171,6 +211,7 @@ void PrintOutput () {
     Serial.println("\tSafety:      " + safetySwitchStr);
     Serial.println("\tT-Status:    " + turbineVoltageStr);
     Serial.println("\tLA Position: " + laPosStr);
+    Serial.println("\tMPPT Enabled:" + PadString(String(mpptEnabled)));
     if (trackResistance) {
         Serial.println("\tTarget Res:  " + PadString(String(targetResistance)));
     } else {
@@ -230,11 +271,20 @@ void Toggle(String &command) {
 
     if (arg == "pcc") {
         digitalWrite(PCC_Relay_Pin, !digitalRead(PCC_Relay_Pin));
-        Serial.println("Relay set to " + digitalRead(PCC_Relay_Pin) ? "High" : "Low");
     } else if (arg = "res") {
         trackResistance = !trackResistance;
+        resistanceTrackingTimer = millis();
+    } else if (arg = "mppt") {
+        trackResistance = false;
+        mpptEnabled = !mpptEnabled;
+        mpptTimer = millis();
     } else if (arg = "print") {
         printOutput = !printOutput;
+    } else if (arg = "sweep") {
+        trackResistance = false;
+        mpptEnabled = false;
+        sweepDac = true;
+        sweepTimer = millis();
     } else {
         Serial.println("Invalid subcommand for switch");
         Serial.println("Try \"help\"");
