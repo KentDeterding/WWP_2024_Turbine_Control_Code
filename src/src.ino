@@ -160,9 +160,9 @@ void loop () {
         float power = voltage * current;
 
         if (power > last_power) {
-            dacValue += dacStepSize;
+            dacValue += dacStepSize / 2;
         } else {
-            dacValue -= dacStepSize;
+            dacValue -= dacStepSize / 2;
         }
 
         last_power = power;
@@ -191,13 +191,13 @@ String PadString (String str) {
 }
 
 void PrintOutput () {
-    Serial.print("\n\n\n"); // Use before data once to see how long accessing the peripherials takes
     String relayState = digitalRead(PCC_Relay_Pin) ? "High" : "Low";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
     String safetySwitchStr = PadString(digitalRead(Safety_Switch_Pin) ? "open" : "closed"); // Should shutdown when closed
     String turbineVoltageStr = PadString(turbineVoltage);
     String laPosStr = PadString(String(myServo.presentPosition(LA_ID_NUM)));
+    String mpptStatus = PadString(mpptEnabled ? "true" : "false");
     String dacValStr = PadString(String(dacValue));
     float current = ina260.readCurrent();
     float voltage = ina260.readBusVoltage();
@@ -206,12 +206,13 @@ void PrintOutput () {
     String voltStr = PadString(String(voltage));
     String powerStr = PadString(String(ina260.readPower()));
     String rpmStr = PadString(String(GetRpmBuffered(rpm_filter)));
+    Serial.print("\n\n\n");
     Serial.println("Time:                " + PadString(String(millis())));
     Serial.println("\tRelay State: " + relayStateStr);
     Serial.println("\tSafety:      " + safetySwitchStr);
     Serial.println("\tT-Status:    " + turbineVoltageStr);
     Serial.println("\tLA Position: " + laPosStr);
-    Serial.println("\tMPPT Enabled:" + PadString(String(mpptEnabled)));
+    Serial.println("\tMPPT Enabled:" + mpptStatus);
     if (trackResistance) {
         Serial.println("\tTarget Res:  " + PadString(String(targetResistance)));
     } else {
