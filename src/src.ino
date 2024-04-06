@@ -45,9 +45,11 @@ bool sweepDac = false;
 
 void setup () {
     Serial.begin(9600);
+    /*
     while (!Serial) {
         // Wait so serial monitor can be opened
     }
+    */
     Serial.println("Starting up...");
 
     // Saftey Switch
