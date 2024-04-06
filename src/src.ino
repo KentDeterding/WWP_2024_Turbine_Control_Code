@@ -27,7 +27,7 @@ struct Filter* rpm_filter = CreateFilter(10, 8);
 
 // Timers
 unsigned long printTimer;
-unsigned long printTimerInterval = 30; // was 1000, but I want to see the limit
+unsigned long printTimerInterval = 200; // was 1000, but I want to see the limit
 unsigned long resistanceTrackingTimer;
 unsigned long resistanceTrackingInterval = 100;
 unsigned long mpptTimer;
@@ -45,61 +45,54 @@ bool sweepDac = false;
 
 void setup () {
     Serial.begin(9600);
-    while (!Serial) { // Wait so serial monitor can be opened
-        delay(10);
+    while (!Serial) {
+        // Wait so serial monitor can be opened
     }
     Serial.println("Starting up...");
-    bool success = true;
 
     // Saftey Switch
     pinMode(Safety_Switch_Pin, INPUT);
 
+    //Relay
+    pinMode(PCC_Relay_Pin, OUTPUT);
+    digitalWrite(PCC_Relay_Pin, HIGH); // Start with turbine-side powered
+
     //Linear Actuator
     myServo.begin(32);
-    delay(100);
-    if (myServo.available()) {
-        myServo.movingSpeed(LA_ID_NUM, 750);
-        Serial.println("Linear actuator ready");
-    } else {
-        Serial.println("Linear actuator error");
-        success = false;
-    }
+    myServo.movingSpeed(LA_ID_NUM, 750);
 
     //INA260
     ina260.begin(0x40);
     delay(10);
-    if (ina260.conversionReady()) {
-        Serial.println("INA260 ready");
-    } else {
+    if (!ina260.conversionReady()) {
         Serial.println("INA260 error");
-        success = false;
     }
 
     //DAC
     dac.begin(0x64);
     delay(10);
     dac.setVoltage(dacValue, false);
-    Serial.println("DAC ready");
-
-    //Relay
-    pinMode(PCC_Relay_Pin, OUTPUT);
 
     // Start RPM Tracking
     attachInterrupt(digitalPinToInterrupt(RPM_Pin), RPM_Interrupt, RISING);
 
-    if (success) {
-        Serial.println("Setup complete");
-    } else {
-        Serial.println("Setup failed");
-    }
-
+    Serial.println("Setup finished");
     Serial.println("Type \"help\" for a list of commands");
 
+    // Init timers
     printTimer = millis();
     resistanceTrackingTimer = millis();
 }
 
 void loop () {
+    for (;;) { // Just here for open house.
+        if (digitalRead(Safety_Switch_Pin) == High) {
+            myServo.goalPosition(LA_ID_NUM, 700);
+        } else {
+            myServo.goalPosition(LA_ID_NUM, 3250);
+        }
+    } // Please remove me.
+
     if (Serial.available() > 0) {
         String serialInput = Serial.readStringUntil('\n');
         ProcessCommand(serialInput);

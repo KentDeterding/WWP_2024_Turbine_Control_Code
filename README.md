@@ -21,12 +21,14 @@ Pin Num = 30
 
 ### Safety Switch
 Pin Num = 11
+An open should turn the turbine off.
 
 
 # Outputs
 
 ### Relay
 Pin Num = 33
+High = Relay Closed = Turbine-Side is powered by Load
 
 ### Fan
 Pin Num = 20
