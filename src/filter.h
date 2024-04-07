@@ -5,12 +5,12 @@
 
 struct Filter;
 
-struct Filter* CreateFilter(unsigned int size, int peaks_per_rotation);
+struct Filter* new_filter(unsigned int size, int peaks_per_rotation);
 
-void Insert(struct Filter* filter, int value);
+void insert(struct Filter* filter, int value);
 
-double GetAverageVal(struct Filter* filter);
+double get_average_val(struct Filter* filter);
 
-double GetRpmBuffered(struct Filter* filter);
+double get_rpm_buffered(struct Filter* filter);
 
 #endif

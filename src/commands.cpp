@@ -2,13 +2,13 @@
 #include "types.h"
 
 // Get the next argument from a string and remove it
-String NextArg(String &command) {
+String next_arg(String &command) {
     String arg = command.substring(0, command.indexOf(" "));
     command = command.substring(command.indexOf(" ") + 1);
     return arg;
 }
 
-Command MatchCommand(String command) {
+Command match_command(String command) {
     if (command == "set") {
         return Command::SET;
     } else if (command.toLowerCase() == "toggle") {
@@ -21,7 +21,7 @@ Command MatchCommand(String command) {
 }
 
 // Help menu
-String Help() {
+String help() {
     // TODO: Fill in commands
     String string =   "List of valid commands:\n";
             string += "set <target> <value>\n";

@@ -5,10 +5,10 @@
 #include <Arduino.h>
 #include "types.h"
 
-String NextArg(String &command);
+String next_arg(String &command);
 
-Command MatchCommand(String command);
+Command match_command(String command);
 
-String Help();
+String help();
 
 #endif

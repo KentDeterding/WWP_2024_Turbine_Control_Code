@@ -8,7 +8,7 @@ struct Filter {
     volatile int* array;
 };
 
-struct Filter* CreateFilter(unsigned int size, int peaks_per_rotation) {
+struct Filter* new_filter(unsigned int size, int peaks_per_rotation) {
     struct Filter* filter = (struct Filter*)malloc(sizeof(struct Filter));
     filter->size = size;
     filter->oldestMoment = 0;
@@ -18,7 +18,7 @@ struct Filter* CreateFilter(unsigned int size, int peaks_per_rotation) {
     return filter;
 }
 
-void Insert(struct Filter* filter, int value) {
+void insert(struct Filter* filter, int value) {
     int index = filter->oldestMoment;
     *(filter->array + index) = value;
     filter->oldestMoment++;
@@ -28,7 +28,7 @@ void Insert(struct Filter* filter, int value) {
 }
 
 // Throws away 2 (oldest) values as a buffer and returns the average of the rest
-double GetAverageVal(struct Filter* filter) {
+double get_average_val(struct Filter* filter) {
     double sum = 0.0;
     for (int i = 0; i < (int)filter->size - 2; i++) {
         int array_index = filter->oldestMoment + i;
@@ -40,7 +40,7 @@ double GetAverageVal(struct Filter* filter) {
     return sum / (double)(filter->size - 2);
 }
 
-double GetRpmBuffered(struct Filter* filter) {
+double get_rpm_buffered(struct Filter* filter) {
     int highIndex = filter->oldestMoment - 1;
     if (highIndex < 0) { highIndex = (int)filter->size - 1; }
     int lowIndex = filter->oldestMoment + 1;
