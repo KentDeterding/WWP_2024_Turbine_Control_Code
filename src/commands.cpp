@@ -13,6 +13,8 @@ Command match_command(String command) {
         return Command::SET;
     } else if (command.toLowerCase() == "toggle") {
         return Command::TOGGLE;
+    } else if (command.toLowerCase() == "switch") {
+        return Command::SELECT;
     } else if (command.toLowerCase() == "help") {
         return Command::HELP;
     } else {

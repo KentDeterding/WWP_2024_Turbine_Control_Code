@@ -1,6 +1,7 @@
-typedef enum {
+enum Command {
     INVALID,
     HELP,
     SET,
-    TOGGLE
-} Command;
+    TOGGLE,
+    SELECT
+};

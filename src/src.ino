@@ -4,12 +4,22 @@
 #include <Adafruit_MCP4725.h>
 #include "filter.h"
 #include "commands.h"
+#include "modes.h"
 
 #define LA_ID_NUM 0             // ID number of the linear actuator
 #define PCC_RELAY_PIN 33        // Relay control pin
 #define SAFETY_SWITCH_PIN 11    // Pin number for the safety switch input
-#define RPM_PIN 29              //
+#define RPM_PIN 29              // Square wave input
 
+
+enum Modes mode = Modes::AUTO;
+
+struct ManualState manual_state = {
+    DacMode::DIRECT_DAC,
+    4.0,
+    PitchMode::DIRECT_LA,
+    90.0,
+};
 
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
@@ -43,10 +53,12 @@ bool mppt_enabled = false;
 float last_power = 0;
 bool sweep_dac = false;
 
-void setup () {
+void setup() {
     Serial.begin(9600);
     while (!Serial) {
         // Wait so serial monitor can be opened
+        if (millis() > 5000)
+            break;
     }
     Serial.println("Starting up...");
 
@@ -82,7 +94,7 @@ void setup () {
     resistance_tracking_timer = millis();
 }
 
-void loop () {
+void loop() {
     if (Serial.available() > 0) {
         String serialInput = Serial.readStringUntil('\n');
         ProcessCommand(serialInput);
@@ -94,43 +106,45 @@ void loop () {
         PrintOutput();
     }
 
+    switch (mode) {
+        case Modes::MANUAL:
+            if (resistance_tracking_timer < millis() && manual_state.dac_mode == DacMode::RESISTANCE) {
+                resistance_tracking_timer += resistance_tracking_interval;
+
+                float voltage = ina260.readBusVoltage();
+                float current = ina260.readCurrent();
+                float resistance = voltage / current;
+
+                float difference = resistance - targetResistance;
+
+                if (difference > 0) {
+                    dac_value += dac_step_size;
+                } else {
+                    dac_value -= dac_step_size;
+                }
+
+                if (dac_value > 4095) {
+                    dac_value = 4095;
+                } else if (dac_value < 0) {
+                    dac_value = 0;
+                }
+                dac.setVoltage(dac_value, false);
+            }
+            break;
+        case Modes::AUTO:
+            // Competition State machine goes here
+
+
+            break;
+        case Modes::TEST:
+
+            break;
+    }
+
     if (digitalRead(SAFETY_SWITCH_PIN) != HIGH) {
         myServo.goalPosition(LA_ID_NUM, 0);
         dac_value = 4095;
         dac.setVoltage(dac_value, false);
-    }
-
-    // Track load resistance
-    if (resistance_tracking_timer < millis() && track_resistance) {
-        resistance_tracking_timer += resistance_tracking_interval;
-
-        // Dac val -> Load Current is a linear relationship
-        // Current(mA) = m*dac_value + b
-        const float m = 1.59404;
-        const float b = 2.53791;
-
-        float voltage = ina260.readBusVoltage();
-        float current = ina260.readCurrent();
-        float resistance = voltage / current;
-
-        float difference = resistance - targetResistance;
-
-        if (difference > 0) {
-            dac_value += dac_step_size;
-        } else {
-            dac_value -= dac_step_size;
-        }
-
-        if (dac_value > 4095) {
-            dac_value = 4095;
-        } else if (dac_value < 0) {
-            dac_value = 0;
-        }
-        dac.setVoltage(dac_value, false);
-
-        //float targetCurrent = voltage / targetResistance;
-        //dac_value = (targetCurrent - b) / m;
-        //dac.setVoltage(dac_value, false);
     }
 
     if (mppt_timer < millis() && mppt_enabled) {
@@ -164,14 +178,14 @@ void loop () {
     }
 }
 
-String PadString (String str) {
+String PadString(String str) {
     while (str.length() < 8) {
         str = " " + str;
     }
     return str;
 }
 
-void PrintOutput () {
+void PrintOutput() {
     String relayState = digitalRead(PCC_RELAY_PIN) ? "High" : "Low";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
@@ -207,7 +221,7 @@ void PrintOutput () {
     Serial.println("\tRPM:         " + rpmStr);
 }
 
-void ProcessCommand (String &serialInput) {
+void ProcessCommand(String &serialInput) {
     String command = serialInput;
     String cmd = next_arg(command);
 
@@ -219,17 +233,20 @@ void ProcessCommand (String &serialInput) {
             Serial.println(help());
             break;
         case Command::SET:
-            Set(command);
+            set(command);
             break;
         case Command::TOGGLE:
-            Toggle(command);
+            toggle(command);
+            break;
+        case Command::SELECT:
+            select(command);
             break;
         default:
             Serial.println("Command not implemented");
     }
 }
 
-void Set(String &command) {
+void set(String &command) {
     String arg = next_arg(command).toLowerCase();
     
     if (arg == "dac") {
@@ -248,7 +265,7 @@ void Set(String &command) {
     }
 }
 
-void Toggle(String &command) {
+void toggle(String &command) {
     String arg = next_arg(command).toLowerCase();
 
     if (arg == "pcc") {
@@ -268,13 +285,30 @@ void Toggle(String &command) {
         sweep_dac = true;
         sweep_timer = millis();
     } else {
-        Serial.println("Invalid subcommand for switch");
+        Serial.println("Invalid subcommand for toggle");
+        Serial.println("Try \"help\"");
+    }
+}
+
+void select(String &command) {
+    String arg = next_arg(command).toLowerCase();
+
+    if (arg == "mode") {
+        String selected_mode = next_arg(command).toLowerCase();
+
+        if (selected_mode == "manual") {
+            mode = Modes::MANUAL;
+        } else if (selected_mode == "auto") {
+            mode = Modes::AUTO;
+        }
+    } else {
+        Serial.println("Invalid subcommand for select");
         Serial.println("Try \"help\"");
     }
 }
 
 // Interrupt for measuring the RPM
-void RPM_Interrupt () {
+void RPM_Interrupt() {
     int time = (int)micros();
     insert(rpm_filter, time);
 }
