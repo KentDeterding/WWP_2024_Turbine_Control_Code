@@ -2,27 +2,27 @@
 #include <PA12.h>
 #include <Adafruit_INA260.h>
 #include <Adafruit_MCP4725.h>
-#include "filter.h"
 #include "commands.h"
-#include "modes.h"
+#include "rpmFilter.h"
+#include "digitalFilter.h"
 
 #define LA_ID_NUM 0             // ID number of the linear actuator
+#define PCC_STATUS_PIN 30       // Reads HIGH when the turbine side voltage is HIGH
 #define PCC_RELAY_PIN 33        // Relay control pin
 #define SAFETY_SWITCH_PIN 11    // Pin number for the safety switch input
 #define RPM_PIN 29              // Square wave input
+#define FEATHERED_POSITION 3000 // Linear Actuator position for stopping the turbine
 
 
 enum Modes mode = Modes::AUTO;
+enum DacMode dac_mode = DacMode::DIRECT_DAC;
+enum PitchMode pitch_mode = PitchMode::DIRECT_LA;
 
-struct ManualState manual_state = {
-    DacMode::DIRECT_DAC,
-    4.0,
-    PitchMode::DIRECT_LA,
-    90.0,
-};
+enum States state = States::STARTUP;
 
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
+const int cut_in_position = 1200;
 
 // INA260
 Adafruit_INA260 ina260 = Adafruit_INA260();
@@ -33,7 +33,7 @@ uint16_t dac_value = 50; // 0 - 4095
 float targetResistance = 8;
 
 // RPM
-struct Filter* rpm_filter = new_filter(10, 8);
+struct RpmFilter *rpm_filter = new_rpm_filter(6, 14);
 
 // Timers
 unsigned long print_timer;
@@ -44,6 +44,8 @@ unsigned long mppt_timer;
 unsigned long mppt_interval = 250;
 unsigned long sweep_timer;
 unsigned long sweep_interval = 500;
+unsigned long read_timer;
+unsigned long read_interval = 50;
 
 // Global State
 bool track_resistance = false;
@@ -52,6 +54,8 @@ bool print_output = true;
 bool mppt_enabled = false;
 float last_power = 0;
 bool sweep_dac = false;
+
+struct DigitalFilter *power_filter = new_digital_filter(5);
 
 void setup() {
     Serial.begin(9600);
@@ -106,9 +110,14 @@ void loop() {
         PrintOutput();
     }
 
+    if (read_timer < millis()) {
+        read_timer += read_interval;
+        digital_filter_insert(power_filter, (float)ina260.readPower());
+    }
+
     switch (mode) {
         case Modes::MANUAL:
-            if (resistance_tracking_timer < millis() && manual_state.dac_mode == DacMode::RESISTANCE) {
+            if (resistance_tracking_timer < millis() && dac_mode == DacMode::RESISTANCE) {
                 resistance_tracking_timer += resistance_tracking_interval;
 
                 float voltage = ina260.readBusVoltage();
@@ -132,49 +141,49 @@ void loop() {
             }
             break;
         case Modes::AUTO:
-            // Competition State machine goes here
+            switch (state) {
+                case States::SAFETY:
+                    if (digitalRead(SAFETY_SWITCH_PIN) == HIGH && digitalRead(PCC_STATUS_PIN)) {
+                        state = States::STARTUP;
+                    } else {
+                        myServo.goalPosition(FEATHERED_POSITION);
+                        dac_value = 4095;
+                        dac.setVoltage(dac_value, false);
+                    }
+                    break;
+                case States::STARTUP:
+                    digitalWrite(PCC_RELAY_PIN, HIGH);
 
+                    myServo.goalPosition(LA_ID_NUM, cut_in_position);
+                    while (myServo.Moving(LA_ID_NUM)) {
+                        // wait for linear actuator to stop moving
+                    }
 
+                    digitalWrite(PCC_RELAY_PIN, LOW);
+
+                    break;
+                case States::AWAIT_POWER:
+                    if (!digitalRead(30)) {
+                        state = States::POWER_CURVE;
+                        myServo.goalPosition(LA_ID_NUM, 900);
+                    }
+
+                    break;
+                case States::POWER_CURVE:
+
+                    // TODO: MPPT
+
+                    break;
+                case States::REGULATE:
+
+                    // TODO: Keep power/rpm stable
+
+                    break;
+            }
             break;
         case Modes::TEST:
-
+            
             break;
-    }
-
-    if (digitalRead(SAFETY_SWITCH_PIN) != HIGH) {
-        myServo.goalPosition(LA_ID_NUM, 0);
-        dac_value = 4095;
-        dac.setVoltage(dac_value, false);
-    }
-
-    if (mppt_timer < millis() && mppt_enabled) {
-        mppt_timer += mppt_interval;
-
-        float voltage = ina260.readBusVoltage();
-        float current = ina260.readCurrent();
-        float power = voltage * current;
-
-        if (power > last_power) {
-            dac_value += dac_step_size / 2;
-        } else {
-            dac_value -= dac_step_size / 2;
-        }
-
-        last_power = power;
-        dac.setVoltage(dac_value, false);
-    }
-
-    // Just a testing fuction to get some data
-    if (sweep_timer < millis() && sweep_dac) {
-        sweep_timer += sweep_interval;
-
-        dac_value += 20;
-        if (dac_value > 4095) {
-            dac_value = 4095;
-            sweep_dac = false;
-            track_resistance = true;
-        }
-        dac.setVoltage(dac_value, false);
     }
 }
 
@@ -199,8 +208,15 @@ void PrintOutput() {
     String resistanceStr = PadString(String(voltage / current));
     String currentStr = PadString(String(current));
     String voltStr = PadString(String(voltage));
-    String powerStr = PadString(String(ina260.readPower()));
-    String rpmStr = PadString(String(get_rpm_buffered(rpm_filter)));
+    String powerStr = PadString(String(digital_filter_get_avg(power_filter)));
+    float rpm; 
+    for (;;) {
+        rpm = rpm_filter_get_avg(rpm_filter);
+        if (rpm == -1)
+            continue;
+        break;
+    }
+    String rpmStr = PadString(String(rpm));
     Serial.print("\n\n\n");
     Serial.println("Time:                " + PadString(String(millis())));
     Serial.println("\tRelay State: " + relayStateStr);
@@ -309,6 +325,5 @@ void select(String &command) {
 
 // Interrupt for measuring the RPM
 void RPM_Interrupt() {
-    int time = (int)micros();
-    insert(rpm_filter, time);
+    rpm_filter_insert(rpm_filter);
 }
