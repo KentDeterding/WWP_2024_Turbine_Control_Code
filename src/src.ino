@@ -17,7 +17,6 @@
 enum Modes mode = Modes::AUTO;
 enum DacMode dac_mode = DacMode::DIRECT_DAC;
 enum PitchMode pitch_mode = PitchMode::DIRECT_LA;
-
 enum States state = States::STARTUP;
 
 // Linear Actuator
@@ -35,6 +34,14 @@ float targetResistance = 8;
 // RPM
 struct RpmFilter *rpm_filter = new_rpm_filter(6, 14);
 
+struct {
+    unsigned int size = 5;
+    float power[5];
+    uint16_t dac_value[5];
+    short dac_delta[5];
+    unsigned char last_index = 0;
+} mppt_data;
+
 // Timers
 unsigned long print_timer;
 unsigned long print_timer_interval = 200;
@@ -46,9 +53,10 @@ unsigned long sweep_timer;
 unsigned long sweep_interval = 500;
 unsigned long read_timer;
 unsigned long read_interval = 50;
+unsigned long state_machine_timer;
+unsigned long state_machine_interval = 100;
 
 // Global State
-bool track_resistance = false;
 int dac_step_size = 20;
 bool print_output = true;
 bool mppt_enabled = false;
@@ -141,6 +149,10 @@ void loop() {
             }
             break;
         case Modes::AUTO:
+            if (state_machine_timer > millis()) {
+                state_machine_timer += state_machine_interval;
+                break;
+            }
             switch (state) {
                 case States::SAFETY:
                     if (digitalRead(SAFETY_SWITCH_PIN) == HIGH && digitalRead(PCC_STATUS_PIN)) {
@@ -155,9 +167,7 @@ void loop() {
                     digitalWrite(PCC_RELAY_PIN, HIGH);
 
                     myServo.goalPosition(LA_ID_NUM, cut_in_position);
-                    while (myServo.Moving(LA_ID_NUM)) {
-                        // wait for linear actuator to stop moving
-                    }
+                    while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
 
                     digitalWrite(PCC_RELAY_PIN, LOW);
 
@@ -171,7 +181,9 @@ void loop() {
                     break;
                 case States::POWER_CURVE:
 
-                    // TODO: MPPT
+                    digital_filter_get_avg(power_filter);
+
+
 
                     break;
                 case States::REGULATE:
@@ -224,7 +236,7 @@ void PrintOutput() {
     Serial.println("\tT-Status:    " + turbineVoltageStr);
     Serial.println("\tLA Position: " + laPosStr);
     Serial.println("\tMPPT Enabled:" + mpptStatus);
-    if (track_resistance) {
+    if (dac_mode == DacMode::RESISTANCE) {
         Serial.println("\tTarget Res:  " + PadString(String(targetResistance)));
     } else {
         Serial.println("\tTarget Res:       N/A");
@@ -287,16 +299,20 @@ void toggle(String &command) {
     if (arg == "pcc") {
         digitalWrite(PCC_RELAY_PIN, !digitalRead(PCC_RELAY_PIN));
     } else if (arg = "res") {
-        track_resistance = !track_resistance;
-        resistance_tracking_timer = millis();
+        if (dac_mode == DacMode::DIRECT_DAC) {
+            dac_mode = DacMode::RESISTANCE;
+            resistance_tracking_timer = millis();
+        } else {
+            dac_mode = DacMode::DIRECT_DAC;
+        }
     } else if (arg = "mppt") {
-        track_resistance = false;
+        dac_mode = DacMode::DIRECT_DAC;
         mppt_enabled = !mppt_enabled;
         mppt_timer = millis();
     } else if (arg = "print") {
         print_output = !print_output;
     } else if (arg = "sweep") {
-        track_resistance = false;
+        dac_mode = DacMode::DIRECT_DAC;
         mppt_enabled = false;
         sweep_dac = true;
         sweep_timer = millis();
