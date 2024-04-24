@@ -17,6 +17,8 @@ Command match_command(String command) {
         return Command::SELECT;
     } else if (command.toLowerCase() == "help") {
         return Command::HELP;
+    } else if (command.toLowerCase() == "select") {
+        return Command::SELECT;
     } else {
         return Command::INVALID;
     }

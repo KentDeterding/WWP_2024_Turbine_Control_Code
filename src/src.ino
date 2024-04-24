@@ -6,22 +6,23 @@
 #include "rpmFilter.h"
 #include "digitalFilter.h"
 
+#define FAN_PIN 20              // PWM on this pin controls the rpm of the cooling fan
 #define LA_ID_NUM 0             // ID number of the linear actuator
 #define PCC_STATUS_PIN 30       // Reads HIGH when the turbine side voltage is HIGH
 #define PCC_RELAY_PIN 33        // Relay control pin
 #define SAFETY_SWITCH_PIN 11    // Pin number for the safety switch input
-#define RPM_PIN 29              // Square wave input
-#define FEATHERED_POSITION 3000 // Linear Actuator position for stopping the turbine
+#define RPM_PIN 29              // Square wave input for calculating RPM
 
-
-enum Modes mode = Modes::AUTO;
+enum Modes mode = Modes::MANUAL;
 enum DacMode dac_mode = DacMode::DIRECT_DAC;
 enum PitchMode pitch_mode = PitchMode::DIRECT_LA;
 enum States state = States::STARTUP;
 
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
-const int cut_in_position = 1200;
+//PA12 pitch_contol = PA12(&Serial1, 16, 1); // possible replace alias for myServo
+const int cut_in_position = 900;
+const int feathered_position = 3200;
 
 // INA260
 Adafruit_INA260 ina260 = Adafruit_INA260();
@@ -32,8 +33,9 @@ uint16_t dac_value = 50; // 0 - 4095
 float targetResistance = 8;
 
 // RPM
-struct RpmFilter *rpm_filter = new_rpm_filter(6, 14);
+struct RpmFilter *rpm_filter = new_rpm_filter(6, 8);
 
+/*
 struct {
     unsigned int size = 5;
     float power[5];
@@ -41,10 +43,11 @@ struct {
     short dac_delta[5];
     unsigned char last_index = 0;
 } mppt_data;
+*/
 
 // Timers
 unsigned long print_timer;
-unsigned long print_timer_interval = 200;
+unsigned long print_timer_interval = 500;
 unsigned long resistance_tracking_timer;
 unsigned long resistance_tracking_interval = 100;
 unsigned long mppt_timer;
@@ -69,34 +72,46 @@ void setup() {
     Serial.begin(9600);
     while (!Serial) {
         // Wait so serial monitor can be opened
-        if (millis() > 5000)
-            break;
     }
     Serial.println("Starting up...");
 
     // Saftey Switch
     pinMode(SAFETY_SWITCH_PIN, INPUT);
 
+    Serial.println("point a");
+
     //Relay
     pinMode(PCC_RELAY_PIN, OUTPUT);
     digitalWrite(PCC_RELAY_PIN, HIGH); // Start with turbine-side powered
+
+    Serial.println("point b");
 
     //Linear Actuator
     myServo.begin(32);
     myServo.movingSpeed(LA_ID_NUM, 750);
 
+    Serial.println("point c");
+
     //INA260
     ina260.begin(0x40);
-    if (!ina260.conversionReady()) {
-        Serial.println("INA260 error");
-    }
+
+    Serial.println("point d");
 
     //DAC
     dac.begin(0x64);
     dac.setVoltage(dac_value, false);
 
+    Serial.println("point e");
+
     // Start RPM Tracking
     attachInterrupt(digitalPinToInterrupt(RPM_PIN), RPM_Interrupt, RISING);
+
+    Serial.println("point f");
+
+    pinMode(FAN_PIN, OUTPUT);
+    digitalWrite(FAN_PIN, HIGH);
+
+    digitalWrite(PCC_RELAY_PIN, LOW);
 
     Serial.println("Setup finished");
     Serial.println("Type \"help\" for a list of commands");
@@ -104,6 +119,7 @@ void setup() {
     // Init timers
     print_timer = millis();
     resistance_tracking_timer = millis();
+    read_timer = millis();
 }
 
 void loop() {
@@ -153,36 +169,55 @@ void loop() {
                 state_machine_timer += state_machine_interval;
                 break;
             }
+            
             switch (state) {
                 case States::SAFETY:
-                    if (digitalRead(SAFETY_SWITCH_PIN) == HIGH && digitalRead(PCC_STATUS_PIN)) {
+                    if (!digitalRead(SAFETY_SWITCH_PIN)/*|| digitalRead(PCC_STATUS_PIN) && ina260.readPower <= 1.0*/) {
                         state = States::STARTUP;
-                    } else {
+                    } /*else {
                         myServo.goalPosition(FEATHERED_POSITION);
                         dac_value = 4095;
                         dac.setVoltage(dac_value, false);
-                    }
+                    }*/
                     break;
                 case States::STARTUP:
                     digitalWrite(PCC_RELAY_PIN, HIGH);
 
+                    delay(1000);
+                    //while (!myServo.available()) {}
                     myServo.goalPosition(LA_ID_NUM, cut_in_position);
+                    delay(2000);
                     while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
+                    Serial.println(myServo.goalPosition(LA_ID_NUM));
+                    Serial.println(myServo.presentPosition(LA_ID_NUM));
+                    Serial.println(myServo.Moving(LA_ID_NUM));
 
                     digitalWrite(PCC_RELAY_PIN, LOW);
+
+                    dac_value = 100;
+                    dac.setVoltage(dac_value, false);
+
+                    state = States::AWAIT_POWER;
 
                     break;
                 case States::AWAIT_POWER:
                     if (!digitalRead(30)) {
                         state = States::POWER_CURVE;
-                        myServo.goalPosition(LA_ID_NUM, 900);
                     }
 
                     break;
                 case States::POWER_CURVE:
 
                     digital_filter_get_avg(power_filter);
+                    myServo.goalPosition(LA_ID_NUM, cut_in_position);
+                    dac_value = 200;
+                    dac.setVoltage(dac_value, false);
 
+
+                    if (digitalRead(SAFETY_SWITCH_PIN)) {
+                        myServo.goalPosition(LA_ID_NUM, feathered_position);
+                        state = States::SAFETY;
+                    }
 
 
                     break;
@@ -208,6 +243,7 @@ String PadString(String str) {
 
 void PrintOutput() {
     String relayState = digitalRead(PCC_RELAY_PIN) ? "High" : "Low";
+    String pcc_connected = digitalRead(PCC_RELAY_PIN) && ina260.readPower() > 1.0 ? "false":"true";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
     String safetySwitchStr = PadString(digitalRead(SAFETY_SWITCH_PIN) ? "open" : "closed"); // Should shutdown when closed
@@ -221,21 +257,41 @@ void PrintOutput() {
     String currentStr = PadString(String(current));
     String voltStr = PadString(String(voltage));
     String powerStr = PadString(String(digital_filter_get_avg(power_filter)));
-    float rpm; 
-    for (;;) {
-        rpm = rpm_filter_get_avg(rpm_filter);
-        if (rpm == -1)
-            continue;
-        break;
+    String rpmStr = PadString(String(rpm_filter_get(rpm_filter)));
+    String current_state;
+    if (mode != Modes::AUTO) {
+        current_state = "N/A";
+    } else {
+        switch (state) {
+            case States::SAFETY:
+                current_state = "safety";
+                break;
+            case States::STARTUP:
+                current_state = "startup";
+                break;
+            case States::AWAIT_POWER:
+                current_state = "await power";
+                break;
+            case States::POWER_CURVE:
+                current_state = "power curve";
+                break;
+            case States::REGULATE:
+                current_state = "regulate";
+                break;
+            default:
+                current_state = "nil";
+                break;
+        }
     }
-    String rpmStr = PadString(String(rpm));
     Serial.print("\n\n\n");
     Serial.println("Time:                " + PadString(String(millis())));
-    Serial.println("\tRelay State: " + relayStateStr);
-    Serial.println("\tSafety:      " + safetySwitchStr);
-    Serial.println("\tT-Status:    " + turbineVoltageStr);
-    Serial.println("\tLA Position: " + laPosStr);
-    Serial.println("\tMPPT Enabled:" + mpptStatus);
+    Serial.println("\tFSM:          " + current_state);
+    Serial.println("\tRelay State:  " + relayStateStr);
+    Serial.println("\tPCC Connected:" + pcc_connected);
+    Serial.println("\tSafety:       " + safetySwitchStr);
+    Serial.println("\tT-Status:     " + turbineVoltageStr);
+    Serial.println("\tLA Position:  " + laPosStr);
+    Serial.println("\tMPPT Enabled: " + mpptStatus);
     if (dac_mode == DacMode::RESISTANCE) {
         Serial.println("\tTarget Res:  " + PadString(String(targetResistance)));
     } else {
@@ -332,6 +388,7 @@ void select(String &command) {
             mode = Modes::MANUAL;
         } else if (selected_mode == "auto") {
             mode = Modes::AUTO;
+            state = States::STARTUP;
         }
     } else {
         Serial.println("Invalid subcommand for select");
