@@ -4,11 +4,9 @@
 - T - MPPT for Load
 - Safety Switch
 - PCC Disconnect
-- Fan
 - Better output in the serial monitor
-- Diff Pressure Sensor Model#: SEN0343
+//- Diff Pressure Sensor Model#: SEN0343
 - Make DAC ergonimics better (struct?)
-- Data recording (SDFat Library)
 
 # Inputs
 

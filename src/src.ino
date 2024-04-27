@@ -78,35 +78,23 @@ void setup() {
     // Saftey Switch
     pinMode(SAFETY_SWITCH_PIN, INPUT);
 
-    Serial.println("point a");
-
     //Relay
     pinMode(PCC_RELAY_PIN, OUTPUT);
     digitalWrite(PCC_RELAY_PIN, HIGH); // Start with turbine-side powered
-
-    Serial.println("point b");
 
     //Linear Actuator
     myServo.begin(32);
     myServo.movingSpeed(LA_ID_NUM, 750);
 
-    Serial.println("point c");
-
     //INA260
     ina260.begin(0x40);
-
-    Serial.println("point d");
 
     //DAC
     dac.begin(0x64);
     dac.setVoltage(dac_value, false);
 
-    Serial.println("point e");
-
     // Start RPM Tracking
     attachInterrupt(digitalPinToInterrupt(RPM_PIN), RPM_Interrupt, RISING);
-
-    Serial.println("point f");
 
     pinMode(FAN_PIN, OUTPUT);
     digitalWrite(FAN_PIN, HIGH);
@@ -169,16 +157,13 @@ void loop() {
                 state_machine_timer += state_machine_interval;
                 break;
             }
+
             
             switch (state) {
                 case States::SAFETY:
-                    if (!digitalRead(SAFETY_SWITCH_PIN)/*|| digitalRead(PCC_STATUS_PIN) && ina260.readPower <= 1.0*/) {
+                    if (safety_switch_closed() && pcc_connected()) {
                         state = States::STARTUP;
-                    } /*else {
-                        myServo.goalPosition(FEATHERED_POSITION);
-                        dac_value = 4095;
-                        dac.setVoltage(dac_value, false);
-                    }*/
+                    }
                     break;
                 case States::STARTUP:
                     digitalWrite(PCC_RELAY_PIN, HIGH);
@@ -187,10 +172,10 @@ void loop() {
                     //while (!myServo.available()) {}
                     myServo.goalPosition(LA_ID_NUM, cut_in_position);
                     delay(2000);
-                    while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
-                    Serial.println(myServo.goalPosition(LA_ID_NUM));
-                    Serial.println(myServo.presentPosition(LA_ID_NUM));
-                    Serial.println(myServo.Moving(LA_ID_NUM));
+                    //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
+                    while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {
+                        Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
+                    }
 
                     digitalWrite(PCC_RELAY_PIN, LOW);
 
@@ -201,7 +186,7 @@ void loop() {
 
                     break;
                 case States::AWAIT_POWER:
-                    if (!digitalRead(30)) {
+                    if (!digitalRead(PCC_STATUS_PIN)) {
                         state = States::POWER_CURVE;
                     }
 
@@ -209,16 +194,14 @@ void loop() {
                 case States::POWER_CURVE:
 
                     digital_filter_get_avg(power_filter);
-                    myServo.goalPosition(LA_ID_NUM, cut_in_position);
-                    dac_value = 200;
+                    myServo.goalPosition(LA_ID_NUM, 700);
+                    dac_value = 150;
                     dac.setVoltage(dac_value, false);
 
-
-                    if (digitalRead(SAFETY_SWITCH_PIN)) {
+                    if (digitalRead(SAFETY_SWITCH_PIN) || !pcc_connected()) {
                         myServo.goalPosition(LA_ID_NUM, feathered_position);
                         state = States::SAFETY;
                     }
-
 
                     break;
                 case States::REGULATE:
@@ -232,6 +215,14 @@ void loop() {
             
             break;
     }
+}
+
+bool safety_switch_closed() {
+    return !digitalRead(SAFETY_SWITCH_PIN);
+}
+
+bool pcc_connected() {
+    return !(!digitalRead(PCC_STATUS_PIN) && ina260.readBusVoltage() < 50.0 && rpm_filter_get(rpm_filter) > 200);
 }
 
 String PadString(String str) {
