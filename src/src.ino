@@ -20,7 +20,7 @@ enum States state = States::STARTUP;
 
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
-//PA12 pitch_contol = PA12(&Serial1, 16, 1); // possible replace alias for myServo
+//PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
 const int cut_in_position = 900;
 const int feathered_position = 3200;
 
@@ -35,29 +35,28 @@ float targetResistance = 8;
 // RPM
 struct RpmFilter *rpm_filter = new_rpm_filter(6, 8);
 
-/*
 struct {
-    unsigned int size = 5;
-    float power[5];
-    uint16_t dac_value[5];
-    short dac_delta[5];
-    unsigned char last_index = 0;
+    float prev_power = 0.0;
+    int prev_la_pos = 0;
+    const int la_step_size = 50;
+    uint16_t prev_dac_value = 0;
+    const uint16_t dac_step_size = 25;
+    uint16_t prev_dir = 1;
 } mppt_data;
-*/
 
 // Timers
 unsigned long print_timer;
-unsigned long print_timer_interval = 500;
+const unsigned long print_timer_interval = 500;
 unsigned long resistance_tracking_timer;
-unsigned long resistance_tracking_interval = 100;
+const unsigned long resistance_tracking_interval = 100;
 unsigned long mppt_timer;
-unsigned long mppt_interval = 250;
+const unsigned long mppt_interval = 250;
 unsigned long sweep_timer;
-unsigned long sweep_interval = 500;
+const unsigned long sweep_interval = 500;
 unsigned long read_timer;
-unsigned long read_interval = 50;
+const unsigned long read_interval = 50;
 unsigned long state_machine_timer;
-unsigned long state_machine_interval = 100;
+const unsigned long state_machine_interval = 100;
 
 // Global State
 int dac_step_size = 20;
@@ -155,9 +154,8 @@ void loop() {
         case Modes::AUTO:
             if (state_machine_timer > millis()) {
                 state_machine_timer += state_machine_interval;
-                break;
+                // break;
             }
-
             
             switch (state) {
                 case States::SAFETY:
@@ -167,11 +165,12 @@ void loop() {
                     break;
                 case States::STARTUP:
                     digitalWrite(PCC_RELAY_PIN, HIGH);
+                    Serial.println("Powering up t-side...");
+                    delay(3000);
 
-                    delay(1000);
                     //while (!myServo.available()) {}
+                    // TODO: Don't start at full force in high wind speeds
                     myServo.goalPosition(LA_ID_NUM, cut_in_position);
-                    delay(2000);
                     //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
                     while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {
                         Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
@@ -186,13 +185,14 @@ void loop() {
 
                     break;
                 case States::AWAIT_POWER:
-                    if (!digitalRead(PCC_STATUS_PIN)) {
+                    // TODO: add a buffer to ensure power is stable
+                    if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 400.0) {
+                        mppt_data.prev_power = digital_filter_get_avg(power_filter);
+                        mppt_data.prev_dir = 1;
                         state = States::POWER_CURVE;
                     }
-
                     break;
                 case States::POWER_CURVE:
-
                     digital_filter_get_avg(power_filter);
                     myServo.goalPosition(LA_ID_NUM, 700);
                     dac_value = 150;
@@ -203,6 +203,20 @@ void loop() {
                         state = States::SAFETY;
                     }
 
+                    // TODO: Check if la is on
+
+                    // Perturb the system
+
+                    // Allow the system to reach new equillibrium
+                    // Observe the system
+                    if (digital_filter_get_avg(power_filter) > mppt_data.prev_power) {// If the perturbation caused better performance,
+                        // move in the same direction
+                        dac_value += mppt_data.dac_step_size * mppt_data.prev_dir;
+                    } else {
+                        // move in the opposite direction
+                        mppt_data.prev_dir *= -1;
+                        dac_value += mppt_data.dac_step_size * mppt_data.prev_dir;
+                    }
                     break;
                 case States::REGULATE:
 
@@ -212,7 +226,7 @@ void loop() {
             }
             break;
         case Modes::TEST:
-            
+
             break;
     }
 }
@@ -234,11 +248,12 @@ String PadString(String str) {
 
 void PrintOutput() {
     String relayState = digitalRead(PCC_RELAY_PIN) ? "High" : "Low";
-    String pcc_connected = digitalRead(PCC_RELAY_PIN) && ina260.readPower() > 1.0 ? "false":"true";
+    String pcc_connected = digitalRead(PCC_RELAY_PIN) && ina260.readPower() > 1.0 ? "false" : "true";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
     String safetySwitchStr = PadString(digitalRead(SAFETY_SWITCH_PIN) ? "open" : "closed"); // Should shutdown when closed
     String turbineVoltageStr = PadString(turbineVoltage);
+    String laTargetStr = PadString(String(myServo.goalPosition(LA_ID_NUM)));
     String laPosStr = PadString(String(myServo.presentPosition(LA_ID_NUM)));
     String mpptStatus = PadString(mppt_enabled ? "true" : "false");
     String dacValStr = PadString(String(dac_value));
@@ -281,6 +296,7 @@ void PrintOutput() {
     Serial.println("\tPCC Connected:" + pcc_connected);
     Serial.println("\tSafety:       " + safetySwitchStr);
     Serial.println("\tT-Status:     " + turbineVoltageStr);
+    Serial.println("\tLA Target:    " + laTargetStr);
     Serial.println("\tLA Position:  " + laPosStr);
     Serial.println("\tMPPT Enabled: " + mpptStatus);
     if (dac_mode == DacMode::RESISTANCE) {
