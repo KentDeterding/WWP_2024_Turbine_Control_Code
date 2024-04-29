@@ -13,7 +13,7 @@
 #define SAFETY_SWITCH_PIN 11    // Pin number for the safety switch input
 #define RPM_PIN 29              // Square wave input for calculating RPM
 
-enum Modes mode = Modes::MANUAL;
+enum Modes mode = Modes::AUTO;
 enum DacMode dac_mode = DacMode::DIRECT_DAC;
 enum PitchMode pitch_mode = PitchMode::DIRECT_LA;
 enum States state = States::STARTUP;
@@ -21,7 +21,7 @@ enum States state = States::STARTUP;
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
-const int cut_in_position = 900;
+const int cut_in_position = 950;
 const int feathered_position = 3200;
 
 // INA260
@@ -30,7 +30,7 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 // DAC
 Adafruit_MCP4725 dac;
 uint16_t dac_value = 50; // 0 - 4095
-float targetResistance = 8;
+float targetResistance = 16.0;
 
 // RPM
 struct RpmFilter *rpm_filter = new_rpm_filter(6, 8);
@@ -40,17 +40,16 @@ struct {
     int prev_la_pos = 0;
     const int la_step_size = 50;
     uint16_t prev_dac_value = 0;
-    const uint16_t dac_step_size = 25;
-    uint16_t prev_dir = 1;
+    float prev_dir = 1;
 } mppt_data;
 
 // Timers
 unsigned long print_timer;
 const unsigned long print_timer_interval = 500;
 unsigned long resistance_tracking_timer;
-const unsigned long resistance_tracking_interval = 100;
+const unsigned long resistance_tracking_interval = 3;
 unsigned long mppt_timer;
-const unsigned long mppt_interval = 250;
+const unsigned long mppt_interval = 1000;
 unsigned long sweep_timer;
 const unsigned long sweep_interval = 500;
 unsigned long read_timer;
@@ -59,13 +58,13 @@ unsigned long state_machine_timer;
 const unsigned long state_machine_interval = 100;
 
 // Global State
-int dac_step_size = 20;
+int dac_step_size = 2;
 bool print_output = true;
 bool mppt_enabled = false;
 float last_power = 0;
 bool sweep_dac = false;
 
-struct DigitalFilter *power_filter = new_digital_filter(5);
+struct DigitalFilter *power_filter = new_digital_filter(15);
 
 void setup() {
     Serial.begin(9600);
@@ -127,38 +126,10 @@ void loop() {
     }
 
     switch (mode) {
-        case Modes::MANUAL:
-            if (resistance_tracking_timer < millis() && dac_mode == DacMode::RESISTANCE) {
-                resistance_tracking_timer += resistance_tracking_interval;
-
-                float voltage = ina260.readBusVoltage();
-                float current = ina260.readCurrent();
-                float resistance = voltage / current;
-
-                float difference = resistance - targetResistance;
-
-                if (difference > 0) {
-                    dac_value += dac_step_size;
-                } else {
-                    dac_value -= dac_step_size;
-                }
-
-                if (dac_value > 4095) {
-                    dac_value = 4095;
-                } else if (dac_value < 0) {
-                    dac_value = 0;
-                }
-                dac.setVoltage(dac_value, false);
-            }
-            break;
         case Modes::AUTO:
-            if (state_machine_timer > millis()) {
-                state_machine_timer += state_machine_interval;
-                // break;
-            }
-            
             switch (state) {
                 case States::SAFETY:
+                    myServo.goalPosition(LA_ID_NUM, feathered_position);
                     if (safety_switch_closed() && pcc_connected()) {
                         state = States::STARTUP;
                     }
@@ -176,7 +147,6 @@ void loop() {
                         Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
                     }
 
-                    digitalWrite(PCC_RELAY_PIN, LOW);
 
                     dac_value = 100;
                     dac.setVoltage(dac_value, false);
@@ -186,47 +156,72 @@ void loop() {
                     break;
                 case States::AWAIT_POWER:
                     // TODO: add a buffer to ensure power is stable
-                    if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 400.0) {
+                    if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 500.0) {
+                        resistance_tracking_timer = millis();
+                        myServo.goalPosition(LA_ID_NUM, 700);
+                        dac_value = 10;
+                        dac.setVoltage(dac_value, false);
+                        mppt_timer = millis() + mppt_interval;
                         mppt_data.prev_power = digital_filter_get_avg(power_filter);
                         mppt_data.prev_dir = 1;
                         state = States::POWER_CURVE;
+                        digitalWrite(PCC_RELAY_PIN, LOW);
                     }
                     break;
                 case States::POWER_CURVE:
-                    digital_filter_get_avg(power_filter);
-                    myServo.goalPosition(LA_ID_NUM, 700);
-                    dac_value = 150;
-                    dac.setVoltage(dac_value, false);
-
                     if (digitalRead(SAFETY_SWITCH_PIN) || !pcc_connected()) {
                         myServo.goalPosition(LA_ID_NUM, feathered_position);
                         state = States::SAFETY;
+                        digitalWrite(PCC_RELAY_PIN, HIGH);
+                        delay(3000);
                     }
 
-                    // TODO: Check if la is on
+                    if (ina260.readBusVoltage() < 25)
+                        break;
 
-                    // Perturb the system
+                    float resistance = ina260.readBusVoltage() / ina260.readCurrent();
+                    float difference = resistance - targetResistance;
 
-                    // Allow the system to reach new equillibrium
-                    // Observe the system
-                    if (digital_filter_get_avg(power_filter) > mppt_data.prev_power) {// If the perturbation caused better performance,
-                        // move in the same direction
-                        dac_value += mppt_data.dac_step_size * mppt_data.prev_dir;
+                    if (difference > 0) {
+                        dac_value += dac_step_size;
                     } else {
-                        // move in the opposite direction
-                        mppt_data.prev_dir *= -1;
-                        dac_value += mppt_data.dac_step_size * mppt_data.prev_dir;
+                        dac_value -= dac_step_size;
                     }
-                    break;
-                case States::REGULATE:
 
-                    // TODO: Keep power/rpm stable
+                    if (dac_value > 4095) {
+                        dac_value = 4095;
+                    } else if (dac_value < 0) {
+                        dac_value = 0;
+                    }
 
+                    if (resistance < 0.1) {
+                        targetResistance = 24.0;
+                        dac_value = 5;
+                        dac.setVoltage(dac_value, false);
+                        delay(1000);
+                    }
+                    dac.setVoltage(dac_value, false);
+
+                    if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.25))
+                        mppt_timer = millis() + mppt_interval;
+                    if (mppt_timer < millis()) {
+                        mppt_timer = millis() + mppt_interval;
+                        if (digital_filter_get_avg(power_filter) > mppt_data.prev_power) {
+                            mppt_data.prev_power = digital_filter_get_avg(power_filter);
+                            targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
+                        } else {
+                            mppt_data.prev_power = digital_filter_get_avg(power_filter);
+                            mppt_data.prev_dir = mppt_data.prev_dir * -1;
+                            targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
+                        }
+                        if (targetResistance < 4.0)
+                            targetResistance = 4.0;
+                    }
+                        
                     break;
             }
             break;
-        case Modes::TEST:
-
+        default:
             break;
     }
 }
@@ -236,7 +231,14 @@ bool safety_switch_closed() {
 }
 
 bool pcc_connected() {
-    return !(!digitalRead(PCC_STATUS_PIN) && ina260.readBusVoltage() < 50.0 && rpm_filter_get(rpm_filter) > 200);
+    if (digitalRead(PCC_RELAY_PIN) && digitalRead(PCC_STATUS_PIN)) {
+        return false;
+    }
+    return !(
+        !digitalRead(PCC_STATUS_PIN) && 
+        ina260.readBusVoltage() < 50.0 && 
+        rpm_filter_get(rpm_filter) > 200
+    );
 }
 
 String PadString(String str) {
@@ -248,13 +250,13 @@ String PadString(String str) {
 
 void PrintOutput() {
     String relayState = digitalRead(PCC_RELAY_PIN) ? "High" : "Low";
-    String pcc_connected = digitalRead(PCC_RELAY_PIN) && ina260.readPower() > 1.0 ? "false" : "true";
     String turbineVoltage = digitalRead(30) ? "off" : "on";
     String relayStateStr = PadString(relayState);
     String safetySwitchStr = PadString(digitalRead(SAFETY_SWITCH_PIN) ? "open" : "closed"); // Should shutdown when closed
     String turbineVoltageStr = PadString(turbineVoltage);
     String laTargetStr = PadString(String(myServo.goalPosition(LA_ID_NUM)));
     String laPosStr = PadString(String(myServo.presentPosition(LA_ID_NUM)));
+    String la_load_str = PadString(String(myServo.presentLoad(LA_ID_NUM)));
     String mpptStatus = PadString(mppt_enabled ? "true" : "false");
     String dacValStr = PadString(String(dac_value));
     float current = ina260.readCurrent();
@@ -281,9 +283,6 @@ void PrintOutput() {
             case States::POWER_CURVE:
                 current_state = "power curve";
                 break;
-            case States::REGULATE:
-                current_state = "regulate";
-                break;
             default:
                 current_state = "nil";
                 break;
@@ -293,23 +292,19 @@ void PrintOutput() {
     Serial.println("Time:                " + PadString(String(millis())));
     Serial.println("\tFSM:          " + current_state);
     Serial.println("\tRelay State:  " + relayStateStr);
-    Serial.println("\tPCC Connected:" + pcc_connected);
     Serial.println("\tSafety:       " + safetySwitchStr);
     Serial.println("\tT-Status:     " + turbineVoltageStr);
     Serial.println("\tLA Target:    " + laTargetStr);
     Serial.println("\tLA Position:  " + laPosStr);
+    Serial.println("\tLA Load:      " + la_load_str);
     Serial.println("\tMPPT Enabled: " + mpptStatus);
-    if (dac_mode == DacMode::RESISTANCE) {
-        Serial.println("\tTarget Res:  " + PadString(String(targetResistance)));
-    } else {
-        Serial.println("\tTarget Res:       N/A");
-    }
-    Serial.println("\tDac:         " + dacValStr);
-    Serial.println("\tResistance:  " + resistanceStr);
-    Serial.println("\tCurrent:     " + currentStr);
-    Serial.println("\tVoltage:     " + voltStr);
-    Serial.println("\tPower:       " + powerStr);
-    Serial.println("\tRPM:         " + rpmStr);
+    Serial.println("\tTarget Res:   " + PadString(String(targetResistance)));
+    Serial.println("\tDac:          " + dacValStr);
+    Serial.println("\tResistance:   " + resistanceStr);
+    Serial.println("\tCurrent:      " + currentStr);
+    Serial.println("\tVoltage:      " + voltStr);
+    Serial.println("\tPower:        " + powerStr);
+    Serial.println("\tRPM:          " + rpmStr);
 }
 
 void ProcessCommand(String &serialInput) {

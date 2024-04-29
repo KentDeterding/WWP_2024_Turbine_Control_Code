@@ -26,6 +26,5 @@ enum States {
     STARTUP,
     AWAIT_POWER,
     SAFETY,
-    POWER_CURVE,
-    REGULATE
+    POWER_CURVE
 };
