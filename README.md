@@ -1,12 +1,10 @@
 # WWP_2024_Turbine_Control_Code
  
 # to-do
-- T - MPPT for Load
-- Safety Switch
-- PCC Disconnect
+- Improve Startup reliability
+- Dynamic Step size for dac
+- Regulation
 - Better output in the serial monitor
-//- Diff Pressure Sensor Model#: SEN0343
-- Make DAC ergonimics better (struct?)
 
 # Inputs
 
@@ -47,23 +45,3 @@ Open for future connections (pitot tube, accelerometer)
 TX = TX1  = D1
 RX = RX1  = D0
 En = SCL1 = D16
-
-
-# Loop Psudo-Code
-- Check input
-- Execute Command
-    - manual mode
-        - set dac
-        - set la raw
-        - set la pitch
-        - change relay position
-    - test mode
-        - sweep dac
-        - sweep pitch
-        - sweep dac & pitch
-        - sweep dac, pitch, & windspeed
-- Print to serial port
-- One of
-    - manual mode
-        - track load res
-    - state machine

@@ -64,7 +64,7 @@ bool mppt_enabled = false;
 float last_power = 0;
 bool sweep_dac = false;
 
-struct DigitalFilter *power_filter = new_digital_filter(15);
+struct DigitalFilter *power_filter = new_digital_filter(8);
 
 void setup() {
     Serial.begin(9600);
@@ -103,7 +103,7 @@ void setup() {
     Serial.println("Type \"help\" for a list of commands");
 
     // Init timers
-    print_timer = millis();
+    print_timer = millis() + 3000;
     resistance_tracking_timer = millis();
     read_timer = millis();
 }
@@ -112,7 +112,6 @@ void loop() {
     if (Serial.available() > 0) {
         String serialInput = Serial.readStringUntil('\n');
         ProcessCommand(serialInput);
-        Serial.flush();
     }
 
     if (print_timer < millis() && print_output) {
@@ -180,10 +179,14 @@ void loop() {
                 float resistance = ina260.readBusVoltage() / ina260.readCurrent();
                 float difference = resistance - targetResistance;
 
+                uint16_t multiplier = 1;
+                if (difference > 5.0)
+                    multiplier = (uint16_t)difference;
+
                 if (difference > 0) {
-                    dac_value += dac_step_size;
+                    dac_value += dac_step_size * multiplier;
                 } else {
-                    dac_value -= dac_step_size;
+                    dac_value -= dac_step_size * multiplier;
                 }
 
                 if (dac_value > 4095) {
@@ -307,96 +310,45 @@ void ProcessCommand(String &serialInput) {
     String cmd = next_arg(command);
 
     if (cmd == "help") {
-
+        help();
     } else if (cmd == "set") {
-    } else if (cmd == "toggle") {
-    } else if (cmd == "select") {
-    } else if (cmd == "") {
+        cmd = next_arg(command);
 
-    switch (match_command(cmd)) {
-        case Command::INVALID:
-            Serial.println("Invalid command: try \"help\"");
-            break;
-        case Command::HELP:
-            Serial.println(help());
-            break;
-        case Command::SET:
-            set(command);
-            break;
-        case Command::TOGGLE:
-            toggle(command);
-            break;
-        case Command::SELECT:
-            select(command);
-            break;
-        default:
-            Serial.println("Command not implemented");
-    }
-}
-
-void set(String &command) {
-    String arg = next_arg(command).toLowerCase();
-    
-    if (arg == "dac") {
-        dac_value = next_arg(command).toInt();
-        dac.setVoltage(dac_value, false);
-        Serial.println("DAC set to " + String(dac_value));
-    } else if (arg == "la") {
-        int pos = next_arg(command).toInt();
-        myServo.goalPosition(LA_ID_NUM, pos);
-        Serial.println("Linear Actuator set to " + String(pos));
-    } else if (arg == "res") {
-        targetResistance = next_arg(command).toFloat();
-    } else {
-        Serial.println("Invalid subcommand for set");
-        Serial.println("Try \"help\"");
-    }
-}
-
-void toggle(String &command) {
-    String arg = next_arg(command).toLowerCase();
-
-    if (arg == "pcc") {
-        digitalWrite(PCC_RELAY_PIN, !digitalRead(PCC_RELAY_PIN));
-    } else if (arg = "res") {
-        if (dac_mode == DacMode::DIRECT_DAC) {
-            dac_mode = DacMode::RESISTANCE;
-            resistance_tracking_timer = millis();
+        if (cmd == "dac") {
+            dac_value = next_arg(command).toInt();
+            dac.setVoltage(dac_value, false);
+            Serial.println("DAC set to " + String(dac_value));
+        } else if (cmd == "la") {
+            int pos = next_arg(command).toInt();
+            myServo.goalPosition(LA_ID_NUM, pos);
+            Serial.println("Linear Actuator set to " + String(pos));
+        } else if (cmd == "res") {
+            targetResistance = next_arg(command).toFloat();
         } else {
-            dac_mode = DacMode::DIRECT_DAC;
+            Serial.println("Invalid subcommand for set");
+            Serial.println("Try \"help\"");
         }
-    } else if (arg = "mppt") {
-        dac_mode = DacMode::DIRECT_DAC;
-        mppt_enabled = !mppt_enabled;
-        mppt_timer = millis();
-    } else if (arg = "print") {
-        print_output = !print_output;
-    } else if (arg = "sweep") {
-        dac_mode = DacMode::DIRECT_DAC;
-        mppt_enabled = false;
-        sweep_dac = true;
-        sweep_timer = millis();
-    } else {
-        Serial.println("Invalid subcommand for toggle");
-        Serial.println("Try \"help\"");
-    }
-}
+    } else if (cmd == "toggle") {
+        cmd = next_arg(command);
 
-void select(String &command) {
-    String arg = next_arg(command).toLowerCase();
+        if (cmd == "pcc") {
+            digitalWrite(PCC_RELAY_PIN, !digitalRead(PCC_RELAY_PIN));
+        } else {
+            Serial.println("Invalid subcommand for toggle");
+            Serial.println("Try \"help\"");
+        }
+    } else if (cmd == "select") {
+        cmd = next_arg(command);
 
-    if (arg == "mode") {
-        String selected_mode = next_arg(command).toLowerCase();
+    } else if (cmd == "mode") {
+        cmd = next_arg(command);
 
-        if (selected_mode == "manual") {
+        if (cmd == "manual") {
             mode = Modes::MANUAL;
-        } else if (selected_mode == "auto") {
+        } else if (cmd == "auto") {
             mode = Modes::AUTO;
             state = States::STARTUP;
         }
-    } else {
-        Serial.println("Invalid subcommand for select");
-        Serial.println("Try \"help\"");
     }
 }
 

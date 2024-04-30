@@ -8,22 +8,6 @@ String next_arg(String &command) {
     return arg;
 }
 
-Command match_command(String command) {
-    if (command == "set") {
-        return Command::SET;
-    } else if (command.toLowerCase() == "toggle") {
-        return Command::TOGGLE;
-    } else if (command.toLowerCase() == "switch") {
-        return Command::SELECT;
-    } else if (command.toLowerCase() == "help") {
-        return Command::HELP;
-    } else if (command.toLowerCase() == "select") {
-        return Command::SELECT;
-    } else {
-        return Command::INVALID;
-    }
-}
-
 // Help menu
 String help() {
     // TODO: Fill in commands
@@ -32,10 +16,10 @@ String help() {
             string += "    | dac <int>\n" +
             string += "    | res <float>\n" +
             string += "    | la <int>\n" +
-            string += "    | pitch <float> (not implemented)\n" +
-            string += "toggle <traget>\n" +
+            string += "toggle <target>\n" +
             string += "    | pcc\n" +
-            string += "    | res (resistance tracking)\n" +
-            string += "    | print\n";
+            string += "mode <new mode>\n" +
+            string += "    : auto\n" +
+            string += "    : manual\n";
     return string;
 }
