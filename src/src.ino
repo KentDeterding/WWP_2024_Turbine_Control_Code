@@ -125,104 +125,99 @@ void loop() {
         digital_filter_insert(power_filter, (float)ina260.readPower());
     }
 
-    switch (mode) {
-        case Modes::AUTO:
-            switch (state) {
-                case States::SAFETY:
+    if (mode == Modes::AUTO) {
+        switch (state) {
+            case States::SAFETY:
+                myServo.goalPosition(LA_ID_NUM, feathered_position);
+                if (safety_switch_closed() && pcc_connected()) {
+                    state = States::STARTUP;
+                }
+                break;
+            case States::STARTUP:
+                digitalWrite(PCC_RELAY_PIN, HIGH);
+                Serial.println("Powering up t-side...");
+                delay(3000);
+
+                //while (!myServo.available()) {}
+                // TODO: Don't start at optimal pitch in high wind speeds.
+                myServo.goalPosition(LA_ID_NUM, cut_in_position);
+                //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
+                while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {
+                    Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
+                }
+
+                dac_value = 100;
+                dac.setVoltage(dac_value, false);
+
+                state = States::AWAIT_POWER;
+
+                break;
+            case States::AWAIT_POWER:
+                // TODO: add a buffer to ensure power is stable
+                if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 500.0) {
+                    resistance_tracking_timer = millis();
+                    myServo.goalPosition(LA_ID_NUM, 700);
+                    dac_value = 10;
+                    dac.setVoltage(dac_value, false);
+                    mppt_timer = millis() + mppt_interval;
+                    mppt_data.prev_power = digital_filter_get_avg(power_filter);
+                    mppt_data.prev_dir = 1;
+                    state = States::POWER_CURVE;
+                    digitalWrite(PCC_RELAY_PIN, LOW);
+                }
+                break;
+            case States::POWER_CURVE:
+                if (digitalRead(SAFETY_SWITCH_PIN) || !pcc_connected()) {
                     myServo.goalPosition(LA_ID_NUM, feathered_position);
-                    if (safety_switch_closed() && pcc_connected()) {
-                        state = States::STARTUP;
-                    }
-                    break;
-                case States::STARTUP:
+                    state = States::SAFETY;
                     digitalWrite(PCC_RELAY_PIN, HIGH);
-                    Serial.println("Powering up t-side...");
                     delay(3000);
+                }
 
-                    //while (!myServo.available()) {}
-                    // TODO: Don't start at full force in high wind speeds
-                    myServo.goalPosition(LA_ID_NUM, cut_in_position);
-                    //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
-                    while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {
-                        Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
-                    }
-
-
-                    dac_value = 100;
-                    dac.setVoltage(dac_value, false);
-
-                    state = States::AWAIT_POWER;
-
+                if (ina260.readBusVoltage() < 25)
                     break;
-                case States::AWAIT_POWER:
-                    // TODO: add a buffer to ensure power is stable
-                    if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 500.0) {
-                        resistance_tracking_timer = millis();
-                        myServo.goalPosition(LA_ID_NUM, 700);
-                        dac_value = 10;
-                        dac.setVoltage(dac_value, false);
-                        mppt_timer = millis() + mppt_interval;
+
+                float resistance = ina260.readBusVoltage() / ina260.readCurrent();
+                float difference = resistance - targetResistance;
+
+                if (difference > 0) {
+                    dac_value += dac_step_size;
+                } else {
+                    dac_value -= dac_step_size;
+                }
+
+                if (dac_value > 4095) {
+                    dac_value = 4095;
+                } else if (dac_value < 0) {
+                    dac_value = 0;
+                }
+
+                if (resistance < 0.1) {
+                    targetResistance = 24.0;
+                    dac_value = 5;
+                    dac.setVoltage(dac_value, false);
+                    delay(1000);
+                }
+                dac.setVoltage(dac_value, false);
+
+                if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.25))
+                    mppt_timer = millis() + mppt_interval;
+                if (mppt_timer < millis()) {
+                    mppt_timer = millis() + mppt_interval;
+                    if (digital_filter_get_avg(power_filter) > mppt_data.prev_power) {
                         mppt_data.prev_power = digital_filter_get_avg(power_filter);
-                        mppt_data.prev_dir = 1;
-                        state = States::POWER_CURVE;
-                        digitalWrite(PCC_RELAY_PIN, LOW);
-                    }
-                    break;
-                case States::POWER_CURVE:
-                    if (digitalRead(SAFETY_SWITCH_PIN) || !pcc_connected()) {
-                        myServo.goalPosition(LA_ID_NUM, feathered_position);
-                        state = States::SAFETY;
-                        digitalWrite(PCC_RELAY_PIN, HIGH);
-                        delay(3000);
-                    }
-
-                    if (ina260.readBusVoltage() < 25)
-                        break;
-
-                    float resistance = ina260.readBusVoltage() / ina260.readCurrent();
-                    float difference = resistance - targetResistance;
-
-                    if (difference > 0) {
-                        dac_value += dac_step_size;
+                        targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
                     } else {
-                        dac_value -= dac_step_size;
+                        mppt_data.prev_power = digital_filter_get_avg(power_filter);
+                        mppt_data.prev_dir = mppt_data.prev_dir * -1;
+                        targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
                     }
-
-                    if (dac_value > 4095) {
-                        dac_value = 4095;
-                    } else if (dac_value < 0) {
-                        dac_value = 0;
-                    }
-
-                    if (resistance < 0.1) {
-                        targetResistance = 24.0;
-                        dac_value = 5;
-                        dac.setVoltage(dac_value, false);
-                        delay(1000);
-                    }
-                    dac.setVoltage(dac_value, false);
-
-                    if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.25))
-                        mppt_timer = millis() + mppt_interval;
-                    if (mppt_timer < millis()) {
-                        mppt_timer = millis() + mppt_interval;
-                        if (digital_filter_get_avg(power_filter) > mppt_data.prev_power) {
-                            mppt_data.prev_power = digital_filter_get_avg(power_filter);
-                            targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
-                        } else {
-                            mppt_data.prev_power = digital_filter_get_avg(power_filter);
-                            mppt_data.prev_dir = mppt_data.prev_dir * -1;
-                            targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
-                        }
-                        if (targetResistance < 4.0)
-                            targetResistance = 4.0;
-                    }
-                        
-                    break;
-            }
-            break;
-        default:
-            break;
+                    if (targetResistance < 4.0)
+                        targetResistance = 4.0;
+                }
+                    
+                break;
+        }
     }
 }
 
@@ -310,6 +305,13 @@ void PrintOutput() {
 void ProcessCommand(String &serialInput) {
     String command = serialInput;
     String cmd = next_arg(command);
+
+    if (cmd == "help") {
+
+    } else if (cmd == "set") {
+    } else if (cmd == "toggle") {
+    } else if (cmd == "select") {
+    } else if (cmd == "") {
 
     switch (match_command(cmd)) {
         case Command::INVALID:
