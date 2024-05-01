@@ -1,6 +1,7 @@
 # WWP_2024_Turbine_Control_Code
  
 # to-do
+- Add power-on time filter for turbine side in await power
 - Improve Startup reliability
 - Dynamic Step size for dac
 - Regulation

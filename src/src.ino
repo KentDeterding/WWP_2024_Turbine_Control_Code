@@ -21,7 +21,8 @@ enum States state = States::STARTUP;
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
-const int cut_in_position = 950;
+const int optimal_pitch = 605;
+const int cut_in_position = 850;
 const int feathered_position = 3200;
 
 // INA260
@@ -47,15 +48,15 @@ struct {
 unsigned long print_timer;
 const unsigned long print_timer_interval = 500;
 unsigned long resistance_tracking_timer;
-const unsigned long resistance_tracking_interval = 3;
+const unsigned long resistance_tracking_interval = 50;
 unsigned long mppt_timer;
 const unsigned long mppt_interval = 1000;
 unsigned long sweep_timer;
 const unsigned long sweep_interval = 500;
 unsigned long read_timer;
 const unsigned long read_interval = 50;
-unsigned long state_machine_timer;
-const unsigned long state_machine_interval = 100;
+unsigned long regulate_timer;
+const unsigned long regulate_interval = 100;
 
 // Global State
 int dac_step_size = 2;
@@ -82,7 +83,6 @@ void setup() {
 
     //Linear Actuator
     myServo.begin(32);
-    myServo.movingSpeed(LA_ID_NUM, 750);
 
     //INA260
     ina260.begin(0x40);
@@ -147,19 +147,19 @@ void loop() {
 
                 state = States::AWAIT_POWER;
 
+                digitalWrite(PCC_RELAY_PIN, LOW);
+                dac_value = 0;
+                dac.setVoltage(dac_value, false);
+
                 break;
             case States::AWAIT_POWER:
                 // TODO: add a buffer to ensure power is stable
-                if (rpm_filter_get(rpm_filter) > 500) {
+                if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 600) {
+                    myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     resistance_tracking_timer = millis();
-                    myServo.goalPosition(LA_ID_NUM, 700);
-                    dac_value = 0;
-                    dac.setVoltage(dac_value, false);
-                    mppt_timer = millis() + mppt_interval;
-                    mppt_data.prev_power = digital_filter_get_avg(power_filter);
-                    mppt_data.prev_dir = 1;
+                    targetResistance = 16.0;
+                    //mppt_timer = millis() + mppt_interval;
                     state = States::POWER_CURVE;
-                    digitalWrite(PCC_RELAY_PIN, LOW);
                 }
                 break;
             case States::POWER_CURVE:
@@ -168,55 +168,38 @@ void loop() {
                     state = States::SAFETY;
                     digitalWrite(PCC_RELAY_PIN, HIGH);
                     delay(3000);
+                } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
+                    state = States::STARTUP;
                 }
 
                 if (ina260.readBusVoltage() < 25)
                     break;
 
-                float load_voltage = ina260.readBusVoltage();
-                float load_current = ina260.readCurrent();
-                float load_power = ina260.readPower();
-                float resistance = load_voltage / ina260.readCurrent();
-                float difference = resistance - targetResistance;
+                if (resistance_tracking_timer < millis()) {
+                    resistance_tracking_timer += resistance_tracking_interval;
+                    float load_voltage = ina260.readBusVoltage();
+                    float load_current = ina260.readCurrent();
+                    float load_power = ina260.readPower();
+                    float resistance = load_voltage / ina260.readCurrent();
+                    float difference = resistance - targetResistance;
 
-                float target_current = load_voltage / targetResistance;
+                    float target_current = load_voltage / targetResistance;
 
-                const float m = 1.59404;
+                    const float m = 1.59404;
 
-                uint16_t new_dac_value = (int)(target_current / m);
+                    uint16_t new_dac_value = (int)(target_current / m);
 
-                dac_value = (new_dac_value + dac_value) / 2;
+                    dac_value = (new_dac_value + dac_value * 4) / 5;
 
-                /*
-                if (dac_value > 200) {
-                    dac_step_size = 5;
-                } else {
-                    dac_step_size = 2;
-                }
-
-                if (difference > 0) {
-                    dac_value += dac_step_size;
-                } else {
-                    dac_value -= dac_step_size;
-                }
-
-                */
-                if (dac_value > 4095) {
-                    dac_value = 4095;
-                } else if (dac_value < 0) {
-                    dac_value = 0;
-                }
-                dac.setVoltage(dac_value, false);
-
-                /*
-                if (resistance < 0.1) {
-                    targetResistance = 24.0;
-                    dac_value = 5;
+                    if (dac_value > 4095) {
+                        dac_value = 4095;
+                    } else if (dac_value < 0) {
+                        dac_value = 0;
+                    }
                     dac.setVoltage(dac_value, false);
-                    delay(1000);
                 }
-                dac.setVoltage(dac_value, false);
 
+                /*
                 if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.5))
                     mppt_timer = millis() + mppt_interval;
                 if (mppt_timer < millis()) {
@@ -234,6 +217,14 @@ void loop() {
                 }
                 */
                     
+                break;
+            case States::REGULATE:
+                if (regulate_timer < millis()) {
+                    regulate_timer += regulate_interval;
+
+
+                }
+
                 break;
         }
     }
