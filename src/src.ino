@@ -145,18 +145,15 @@ void loop() {
                     Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
                 }
 
-                dac_value = 100;
-                dac.setVoltage(dac_value, false);
-
                 state = States::AWAIT_POWER;
 
                 break;
             case States::AWAIT_POWER:
                 // TODO: add a buffer to ensure power is stable
-                if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 500.0) {
+                if (rpm_filter_get(rpm_filter) > 500) {
                     resistance_tracking_timer = millis();
                     myServo.goalPosition(LA_ID_NUM, 700);
-                    dac_value = 10;
+                    dac_value = 0;
                     dac.setVoltage(dac_value, false);
                     mppt_timer = millis() + mppt_interval;
                     mppt_data.prev_power = digital_filter_get_avg(power_filter);
@@ -176,25 +173,42 @@ void loop() {
                 if (ina260.readBusVoltage() < 25)
                     break;
 
-                float resistance = ina260.readBusVoltage() / ina260.readCurrent();
+                float load_voltage = ina260.readBusVoltage();
+                float load_current = ina260.readCurrent();
+                float load_power = ina260.readPower();
+                float resistance = load_voltage / ina260.readCurrent();
                 float difference = resistance - targetResistance;
 
-                uint16_t multiplier = 1;
-                if (difference > 5.0)
-                    multiplier = (uint16_t)difference;
+                float target_current = load_voltage / targetResistance;
 
-                if (difference > 0) {
-                    dac_value += dac_step_size * multiplier;
+                const float m = 1.59404;
+
+                uint16_t new_dac_value = (int)(target_current / m);
+
+                dac_value = (new_dac_value + dac_value) / 2;
+
+                /*
+                if (dac_value > 200) {
+                    dac_step_size = 5;
                 } else {
-                    dac_value -= dac_step_size * multiplier;
+                    dac_step_size = 2;
                 }
 
+                if (difference > 0) {
+                    dac_value += dac_step_size;
+                } else {
+                    dac_value -= dac_step_size;
+                }
+
+                */
                 if (dac_value > 4095) {
                     dac_value = 4095;
                 } else if (dac_value < 0) {
                     dac_value = 0;
                 }
+                dac.setVoltage(dac_value, false);
 
+                /*
                 if (resistance < 0.1) {
                     targetResistance = 24.0;
                     dac_value = 5;
@@ -203,7 +217,7 @@ void loop() {
                 }
                 dac.setVoltage(dac_value, false);
 
-                if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.25))
+                if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.5))
                     mppt_timer = millis() + mppt_interval;
                 if (mppt_timer < millis()) {
                     mppt_timer = millis() + mppt_interval;
@@ -218,6 +232,7 @@ void loop() {
                     if (targetResistance < 4.0)
                         targetResistance = 4.0;
                 }
+                */
                     
                 break;
         }
@@ -294,8 +309,8 @@ void PrintOutput() {
     Serial.println("\tT-Status:     " + turbineVoltageStr);
     Serial.println("\tLA Target:    " + laTargetStr);
     Serial.println("\tLA Position:  " + laPosStr);
-    Serial.println("\tLA Load:      " + la_load_str);
-    Serial.println("\tMPPT Enabled: " + mpptStatus);
+    //Serial.println("\tLA Load:      " + la_load_str);
+    //Serial.println("\tMPPT Enabled: " + mpptStatus);
     Serial.println("\tTarget Res:   " + PadString(String(targetResistance)));
     Serial.println("\tDac:          " + dacValStr);
     Serial.println("\tResistance:   " + resistanceStr);
