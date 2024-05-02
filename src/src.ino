@@ -5,6 +5,7 @@
 #include "commands.h"
 #include "rpmFilter.h"
 #include "digitalFilter.h"
+#include "powerFilter.h"
 
 #define FAN_PIN 20              // PWM on this pin controls the rpm of the cooling fan
 #define LA_ID_NUM 0             // ID number of the linear actuator
@@ -22,7 +23,7 @@ enum States state = States::STARTUP;
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
 const int optimal_pitch = 605;
-const int cut_in_position = 850;
+const int cut_in_position = 900;
 const int feathered_position = 3200;
 
 // INA260
@@ -31,10 +32,12 @@ Adafruit_INA260 ina260 = Adafruit_INA260();
 // DAC
 Adafruit_MCP4725 dac;
 uint16_t dac_value = 50; // 0 - 4095
-float targetResistance = 16.0;
+float target_resistance = 16.0;
 
 // RPM
 struct RpmFilter *rpm_filter = new_rpm_filter(6, 8);
+
+PowerFilter on_filter = PowerFilter(2000, 100);
 
 struct {
     float prev_power = 0.0;
@@ -124,8 +127,15 @@ void loop() {
         digital_filter_insert(power_filter, (float)ina260.readPower());
     }
 
+    if (on_filter.timer < millis()) {
+        on_filter.timer += on_filter.get_interval();
+        on_filter.poll();
+    }
+
     if (mode == Modes::AUTO) {
         switch (state) {
+            case States::REGULATE:
+                break;
             case States::SAFETY:
                 myServo.goalPosition(LA_ID_NUM, feathered_position);
                 if (safety_switch_closed() && pcc_connected()) {
@@ -139,6 +149,8 @@ void loop() {
 
                 //while (!myServo.available()) {}
                 // TODO: Don't start at optimal pitch in high wind speeds.
+                myServo.goalPosition(LA_ID_NUM, 1200);
+                delay(2000);
                 myServo.goalPosition(LA_ID_NUM, cut_in_position);
                 //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
                 while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {
@@ -154,10 +166,10 @@ void loop() {
                 break;
             case States::AWAIT_POWER:
                 // TODO: add a buffer to ensure power is stable
-                if (!digitalRead(PCC_STATUS_PIN) && rpm_filter_get(rpm_filter) > 600) {
+                if (on_filter.is_on() && rpm_filter_get(rpm_filter) > 600) {
                     myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     resistance_tracking_timer = millis();
-                    targetResistance = 16.0;
+                    target_resistance = 16.0;
                     //mppt_timer = millis() + mppt_interval;
                     state = States::POWER_CURVE;
                 }
@@ -179,11 +191,8 @@ void loop() {
                     resistance_tracking_timer += resistance_tracking_interval;
                     float load_voltage = ina260.readBusVoltage();
                     float load_current = ina260.readCurrent();
-                    float load_power = ina260.readPower();
-                    float resistance = load_voltage / ina260.readCurrent();
-                    float difference = resistance - targetResistance;
 
-                    float target_current = load_voltage / targetResistance;
+                    float target_current = load_voltage / target_resistance;
 
                     const float m = 1.59404;
 
@@ -199,32 +208,22 @@ void loop() {
                     dac.setVoltage(dac_value, false);
                 }
 
-                /*
-                if ((abs(targetResistance - ina260.readBusVoltage() / ina260.readCurrent()) > 0.5))
-                    mppt_timer = millis() + mppt_interval;
-                if (mppt_timer < millis()) {
-                    mppt_timer = millis() + mppt_interval;
-                    if (digital_filter_get_avg(power_filter) > mppt_data.prev_power) {
-                        mppt_data.prev_power = digital_filter_get_avg(power_filter);
-                        targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
-                    } else {
-                        mppt_data.prev_power = digital_filter_get_avg(power_filter);
-                        mppt_data.prev_dir = mppt_data.prev_dir * -1;
-                        targetResistance = targetResistance + (0.3 * mppt_data.prev_dir);
-                    }
-                    if (targetResistance < 4.0)
-                        targetResistance = 4.0;
+                float load_power = digital_filter_get_avg(power_filter);
+
+                if (load_power < 2500) {
+                    target_resistance = 16.0;
+                } else if (load_power <  4000) {
+                    target_resistance = 11.5;
+                } else if (load_power <  7000) {
+                    target_resistance =  7.0;
+                } else if (load_power < 12000) {
+                    target_resistance =  5.5;
+                } else if (load_power < 16000) {
+                    target_resistance =  5.0;
+                } else if (load_power < 24000) {
+                    target_resistance =  4.0;
                 }
-                */
                     
-                break;
-            case States::REGULATE:
-                if (regulate_timer < millis()) {
-                    regulate_timer += regulate_interval;
-
-
-                }
-
                 break;
         }
     }
@@ -302,7 +301,7 @@ void PrintOutput() {
     Serial.println("\tLA Position:  " + laPosStr);
     //Serial.println("\tLA Load:      " + la_load_str);
     //Serial.println("\tMPPT Enabled: " + mpptStatus);
-    Serial.println("\tTarget Res:   " + PadString(String(targetResistance)));
+    Serial.println("\tTarget Res:   " + PadString(String(target_resistance)));
     Serial.println("\tDac:          " + dacValStr);
     Serial.println("\tResistance:   " + resistanceStr);
     Serial.println("\tCurrent:      " + currentStr);
@@ -329,7 +328,7 @@ void ProcessCommand(String &serialInput) {
             myServo.goalPosition(LA_ID_NUM, pos);
             Serial.println("Linear Actuator set to " + String(pos));
         } else if (cmd == "res") {
-            targetResistance = next_arg(command).toFloat();
+            target_resistance = next_arg(command).toFloat();
         } else {
             Serial.println("Invalid subcommand for set");
             Serial.println("Try \"help\"");
