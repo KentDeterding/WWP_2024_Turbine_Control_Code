@@ -23,7 +23,7 @@ enum States state = States::STARTUP;
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
 const int optimal_pitch = 605;
-const int cut_in_position = 900;
+const int cut_in_position = 950;
 const int feathered_position = 3200;
 
 // INA260
@@ -37,7 +37,7 @@ float target_resistance = 16.0;
 // RPM
 struct RpmFilter *rpm_filter = new_rpm_filter(6, 8);
 
-PowerFilter on_filter = PowerFilter(2000, 100);
+PowerFilter on_filter = PowerFilter(1500, 100);
 
 struct {
     float prev_power = 0.0;
@@ -145,31 +145,30 @@ void loop() {
             case States::STARTUP:
                 digitalWrite(PCC_RELAY_PIN, HIGH);
                 Serial.println("Powering up t-side...");
-                delay(3000);
+                delay(4000);
 
                 //while (!myServo.available()) {}
                 // TODO: Don't start at optimal pitch in high wind speeds.
-                myServo.goalPosition(LA_ID_NUM, 1200);
-                delay(2000);
                 myServo.goalPosition(LA_ID_NUM, cut_in_position);
                 //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
                 while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {
                     Serial.println("Delta:\t" + (myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)));
                 }
 
+                digitalWrite(PCC_RELAY_PIN, LOW);
+
                 state = States::AWAIT_POWER;
 
-                digitalWrite(PCC_RELAY_PIN, LOW);
                 dac_value = 0;
                 dac.setVoltage(dac_value, false);
 
                 break;
             case States::AWAIT_POWER:
                 // TODO: add a buffer to ensure power is stable
-                if (on_filter.is_on() && rpm_filter_get(rpm_filter) > 600) {
+                if (ina260.readBusVoltage() > 5000 && rpm_filter_get(rpm_filter) > 600) {
                     myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     resistance_tracking_timer = millis();
-                    target_resistance = 16.0;
+                    target_resistance = 32.0;
                     //mppt_timer = millis() + mppt_interval;
                     state = States::POWER_CURVE;
                 }
@@ -179,7 +178,7 @@ void loop() {
                     myServo.goalPosition(LA_ID_NUM, feathered_position);
                     state = States::SAFETY;
                     digitalWrite(PCC_RELAY_PIN, HIGH);
-                    delay(3000);
+                    delay(5000);
                 } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
                     state = States::STARTUP;
                 }
@@ -190,7 +189,6 @@ void loop() {
                 if (resistance_tracking_timer < millis()) {
                     resistance_tracking_timer += resistance_tracking_interval;
                     float load_voltage = ina260.readBusVoltage();
-                    float load_current = ina260.readCurrent();
 
                     float target_current = load_voltage / target_resistance;
 
@@ -213,8 +211,8 @@ void loop() {
                 if (load_power < 2500) {
                     target_resistance = 16.0;
                 } else if (load_power <  4000) {
-                    target_resistance = 11.5;
-                } else if (load_power <  7000) {
+                    target_resistance = 11.0;
+                } else if (load_power <  7500) {
                     target_resistance =  7.0;
                 } else if (load_power < 12000) {
                     target_resistance =  5.5;
@@ -234,9 +232,10 @@ bool safety_switch_closed() {
 }
 
 bool pcc_connected() {
-    if (digitalRead(PCC_RELAY_PIN) && digitalRead(PCC_STATUS_PIN)) {
+    if (digitalRead(PCC_RELAY_PIN) && digitalRead(PCC_STATUS_PIN))
         return false;
-    }
+    if (ina260.readBusVoltage() < 50 && ina260.readPower() > 100)
+        return false;
     return !(
         !digitalRead(PCC_STATUS_PIN) && 
         ina260.readBusVoltage() < 50.0 && 
@@ -352,6 +351,12 @@ void ProcessCommand(String &serialInput) {
             mode = Modes::MANUAL;
         } else if (cmd == "auto") {
             mode = Modes::AUTO;
+            state = States::STARTUP;
+        }
+    } else if (cmd == "state") {
+        cmd = next_arg(command);
+
+        if (cmd == "startup") {
             state = States::STARTUP;
         }
     }
