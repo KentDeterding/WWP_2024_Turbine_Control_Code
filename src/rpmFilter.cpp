@@ -48,7 +48,7 @@ float rpm_filter_get(RpmFilter *filter) {
     float freq = 1 / period;
     float rpm = freq * 120 / filter->poles;
 
-    if (rpm > 10000.0 || micros() - filter->last_time > 250000)
+    if (rpm > 10000.0 || micros() - filter->last_time > 50000)
         rpm = -1.0;
 
     //if (lock != filter->lock)
