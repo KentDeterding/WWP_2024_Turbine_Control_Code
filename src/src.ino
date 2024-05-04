@@ -22,10 +22,10 @@ enum States state = States::STARTUP;
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
-const int optimal_pitch = 605;
+const int optimal_pitch = 600;
 const int cut_in_position = 950;
 const int feathered_position = 3200;
-int target_rpm = 1500;
+const int target_rpm = 2900;
 
 // INA260
 Adafruit_INA260 ina260 = Adafruit_INA260();
@@ -60,7 +60,7 @@ const unsigned long sweep_interval = 500;
 unsigned long read_timer;
 const unsigned long read_interval = 50;
 unsigned long regulate_timer;
-const unsigned long regulate_interval = 100;
+const unsigned long regulate_interval = 250;
 unsigned long time_in_state = 0;
 
 // Global State
@@ -151,15 +151,30 @@ void loop() {
                     delay(5000);
                 } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
                     state = States::STARTUP;
+                } else if (rpm_filter_get(rpm_filter) < target_rpm - 500 /*&& 
+                            myServo.presentPosition(LA_ID_NUM) < optimal_pitch + 100*/) {
+                    state = States::POWER_CURVE;
                 }
 
                 if (regulate_timer < millis()) {
                     regulate_timer += regulate_interval;
 
-                    if (rpm_filter_get(rpm_filter) > target_rpm + 30) {
-                        la_pos += 3;
-                    } else if (rpm_filter_get(rpm_filter) < target_rpm - 30) { 
-                        la_pos -= 3;
+                    int cur_rpm = rpm_filter_get(rpm_filter);
+
+                    int difference = cur_rpm - target_rpm;
+
+                    if (380 <= difference) {
+                        la_pos += 30;
+                    } else if (80 <= difference && difference < 380) {
+                        la_pos += (difference - 80) * 0.1 + 2;
+                    } else if (20 <= difference && difference < 80) {
+                        la_pos += 2;
+                    }
+
+                    if (cur_rpm < target_rpm - 100) {
+                        la_pos -= 5;
+                    } else if (cur_rpm < target_rpm - 30) { 
+                        la_pos -= 1;
                     }
 
                     if (la_pos < optimal_pitch)
@@ -190,7 +205,9 @@ void loop() {
 
                 load_power = digital_filter_get_avg(power_filter);
 
-                if (load_power < 2500) {
+                if (load_power < 800) {
+                    target_resistance = 32.0;
+                } else if (load_power < 2500) {
                     target_resistance = 16.0;
                 } else if (load_power <  4000) {
                     target_resistance = 11.0;
@@ -225,27 +242,21 @@ void loop() {
                     break;
                 delay_set = false;
 
-                //while (!myServo.available()) {}
-                // TODO: Don't start at optimal pitch in high wind speeds.
                 myServo.goalPosition(LA_ID_NUM, cut_in_position);
-                //while (myServo.Moving(LA_ID_NUM)) {} // wait for linear actuator to stop moving
                 while (abs(myServo.presentPosition(LA_ID_NUM) - myServo.goalPosition(LA_ID_NUM)) > 400) {}
-
-                digitalWrite(PCC_RELAY_PIN, LOW);
-
-                state = States::AWAIT_POWER;
 
                 dac_value = 0;
                 dac.setVoltage(dac_value, false);
 
+                digitalWrite(PCC_RELAY_PIN, LOW);
+
+                state = States::AWAIT_POWER;
                 break;
             case States::AWAIT_POWER:
-                // TODO: add a buffer to ensure power is stable
                 if (ina260.readBusVoltage() > 5000 && rpm_filter_get(rpm_filter) > 600) {
                     myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     resistance_tracking_timer = millis();
                     target_resistance = last_target_res;
-                    //mppt_timer = millis() + mppt_interval;
                     state = States::POWER_CURVE;
                     time_in_state = millis();
                 }
@@ -255,17 +266,23 @@ void loop() {
                     myServo.goalPosition(LA_ID_NUM, feathered_position);
                     state = States::SAFETY;
                     digitalWrite(PCC_RELAY_PIN, HIGH);
-                    last_target_res = target_resistance;
+                    if (target_resistance < 5.6) {
+                        last_target_res = target_resistance;
+                    } else {
+                        last_target_res = 32.0;
+                    }
                     safety_time = millis();
                 } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
                     state = States::STARTUP;
                     last_target_res = 32.0;
+                } else if (rpm_filter_get(rpm_filter) > target_rpm && ina260.readPower() > 10000) {
+                    state = States::REGULATE;
                 }
 
                 if (ina260.readBusVoltage() < 25)
                     break;
 
-                if (resistance_tracking_timer < millis()) {
+                if (resistance_tracking_timer < millis() && millis() - time_in_state > 200) {
                     resistance_tracking_timer += resistance_tracking_interval;
                     float load_voltage = ina260.readBusVoltage();
 
@@ -275,12 +292,7 @@ void loop() {
 
                     uint16_t new_dac_value = (int)(target_current / m);
 
-                    dac_value = (new_dac_value + dac_value * 3) / 4;
-
-/*
-                    if (dac_value < 300 && load_voltage > 10000) {
-                        dac_value = 700;
-                    }*/
+                    dac_value = (new_dac_value + dac_value * 2) / 3;
 
                     if (dac_value > 4095) {
                         dac_value = 4095;
@@ -292,7 +304,7 @@ void loop() {
 
                 load_power = digital_filter_get_avg(power_filter);
 
-                if (millis() - time_in_state < 2000)
+                if (millis() - time_in_state < 4000)
                     break;
 
                 if (load_power < 2500) {
@@ -301,7 +313,7 @@ void loop() {
                     target_resistance = 11.0;
                 } else if (load_power <  7500) {
                     target_resistance =  7.0;
-                } else if (load_power < 12000) {
+                } else if (load_power < 13000) {
                     target_resistance =  5.5;
                 } else if (load_power < 16000) {
                     target_resistance =  5.0;
@@ -311,7 +323,31 @@ void loop() {
                     
                 break;
         }
+    } else {
+        if (resistance_tracking_timer < millis()) {
+            resistance_tracking_timer += resistance_tracking_interval;
+            float load_voltage = ina260.readBusVoltage();
+
+            float target_current = load_voltage / target_resistance;
+
+            const float m = 1.59404;
+
+            uint16_t new_dac_value = (int)(target_current / m);
+
+            dac_value = (new_dac_value + dac_value * 2) / 3;
+
+            if (dac_value > 4095) {
+                dac_value = 4095;
+            } else if (dac_value < 0) {
+                dac_value = 0;
+            }
+            dac.setVoltage(dac_value, false);
+        }
     }
+}
+
+void transition_safety() {
+
 }
 
 bool safety_switch_closed() {
@@ -397,7 +433,7 @@ void PrintOutput() {
     Serial.println("\tVoltage:      " + voltStr);
     Serial.println("\tPower:        " + powerStr);
     Serial.println("\tRPM:          " + rpmStr);
-    Serial.println("\tTarget RPM:   " + target_rpm);
+    //Serial.println("\tTarget RPM:   " + target_rpm);
 }
 
 void ProcessCommand(String &serialInput) {
@@ -420,7 +456,7 @@ void ProcessCommand(String &serialInput) {
         } else if (cmd == "res") {
             target_resistance = next_arg(command).toFloat();
         } else if (cmd == "rpm") {
-            target_rpm = next_arg(command).toInt();
+            //target_rpm = next_arg(command).toInt();
         } else {
             Serial.println("Invalid subcommand for set");
             Serial.println("Try \"help\"");
@@ -442,6 +478,7 @@ void ProcessCommand(String &serialInput) {
 
         if (cmd == "manual") {
             mode = Modes::MANUAL;
+            resistance_tracking_timer = millis();
         } else if (cmd == "auto") {
             mode = Modes::AUTO;
             state = States::STARTUP;
@@ -451,6 +488,9 @@ void ProcessCommand(String &serialInput) {
 
         if (cmd == "startup") {
             state = States::STARTUP;
+        } else if (cmd == "power") {
+            state = States::POWER_CURVE;
+            myServo.goalPosition(LA_ID_NUM, optimal_pitch);
         } else if (cmd == "regulate") {
             state = States::REGULATE;
             regulate_timer = millis();
