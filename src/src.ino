@@ -61,6 +61,7 @@ unsigned long read_timer;
 const unsigned long read_interval = 50;
 unsigned long regulate_timer;
 const unsigned long regulate_interval = 100;
+unsigned long time_in_state = 0;
 
 // Global State
 int dac_step_size = 2;
@@ -71,6 +72,7 @@ bool sweep_dac = false;
 bool delay_set = false;
 unsigned int delay_timer;
 unsigned int safety_time;
+float last_target_res = 32.0;
 
 struct DigitalFilter *power_filter = new_digital_filter(8);
 float load_power = 0;
@@ -242,9 +244,10 @@ void loop() {
                 if (ina260.readBusVoltage() > 5000 && rpm_filter_get(rpm_filter) > 600) {
                     myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     resistance_tracking_timer = millis();
-                    target_resistance = 32.0;
+                    target_resistance = last_target_res;
                     //mppt_timer = millis() + mppt_interval;
                     state = States::POWER_CURVE;
+                    time_in_state = millis();
                 }
                 break;
             case States::POWER_CURVE:
@@ -252,9 +255,11 @@ void loop() {
                     myServo.goalPosition(LA_ID_NUM, feathered_position);
                     state = States::SAFETY;
                     digitalWrite(PCC_RELAY_PIN, HIGH);
+                    last_target_res = target_resistance;
                     safety_time = millis();
                 } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
                     state = States::STARTUP;
+                    last_target_res = 32.0;
                 }
 
                 if (ina260.readBusVoltage() < 25)
@@ -270,7 +275,12 @@ void loop() {
 
                     uint16_t new_dac_value = (int)(target_current / m);
 
-                    dac_value = (new_dac_value + dac_value * 4) / 5;
+                    dac_value = (new_dac_value + dac_value * 3) / 4;
+
+/*
+                    if (dac_value < 300 && load_voltage > 10000) {
+                        dac_value = 700;
+                    }*/
 
                     if (dac_value > 4095) {
                         dac_value = 4095;
@@ -281,6 +291,9 @@ void loop() {
                 }
 
                 load_power = digital_filter_get_avg(power_filter);
+
+                if (millis() - time_in_state < 2000)
+                    break;
 
                 if (load_power < 2500) {
                     target_resistance = 16.0;
