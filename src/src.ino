@@ -22,7 +22,7 @@ enum States state = States::STARTUP;
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
-const int optimal_pitch = 600;
+const int optimal_pitch = 605;
 const int cut_in_position = 950;
 const int feathered_position = 3200;
 const int target_rpm = 2900;
@@ -58,9 +58,9 @@ const unsigned long mppt_interval = 1000;
 unsigned long sweep_timer;
 const unsigned long sweep_interval = 500;
 unsigned long read_timer;
-const unsigned long read_interval = 50;
+const unsigned long read_interval = 25;
 unsigned long regulate_timer;
-const unsigned long regulate_interval = 250;
+const unsigned long regulate_interval = 200;
 unsigned long time_in_state = 0;
 
 // Global State
@@ -74,7 +74,7 @@ unsigned int delay_timer;
 unsigned int safety_time;
 float last_target_res = 32.0;
 
-struct DigitalFilter *power_filter = new_digital_filter(8);
+struct DigitalFilter *power_filter = new_digital_filter(5);
 float load_power = 0;
 
 int la_pos;
@@ -151,30 +151,36 @@ void loop() {
                     delay(5000);
                 } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
                     state = States::STARTUP;
-                } else if (rpm_filter_get(rpm_filter) < target_rpm - 500 /*&& 
-                            myServo.presentPosition(LA_ID_NUM) < optimal_pitch + 100*/) {
+                } else if (rpm_filter_get(rpm_filter) < target_rpm - 800) {
+                  dac_value = 0;
+                  target_resistance = 8;
                     state = States::POWER_CURVE;
                 }
 
                 if (regulate_timer < millis()) {
-                    regulate_timer += regulate_interval;
+                    regulate_timer = millis () + regulate_interval;
 
                     int cur_rpm = rpm_filter_get(rpm_filter);
 
                     int difference = cur_rpm - target_rpm;
 
                     if (380 <= difference) {
-                        la_pos += 30;
-                    } else if (80 <= difference && difference < 380) {
-                        la_pos += (difference - 80) * 0.1 + 2;
-                    } else if (20 <= difference && difference < 80) {
-                        la_pos += 2;
+                        la_pos += 50;
+                    } else if (200 <= difference && difference < 380) {
+                      la_pos += 40;
+                    } else if (80 <= difference && difference < 200) {
+                        la_pos += 20;
+                    } else if (35 <= difference && difference < 80) {
+                        la_pos += 3;
                     }
 
-                    if (cur_rpm < target_rpm - 100) {
+                    if (cur_rpm < target_rpm - 500) {
+                        la_pos -= 20;
+                    } 
+                    else if (cur_rpm < target_rpm - 200) {
+                        la_pos -= 15;
+                    } else if (cur_rpm < target_rpm - 35) { 
                         la_pos -= 5;
-                    } else if (cur_rpm < target_rpm - 30) { 
-                        la_pos -= 1;
                     }
 
                     if (la_pos < optimal_pitch)
@@ -184,7 +190,7 @@ void loop() {
                 }
 
                 if (resistance_tracking_timer < millis()) {
-                    resistance_tracking_timer += resistance_tracking_interval;
+                    resistance_tracking_timer = millis() + resistance_tracking_interval;
                     float load_voltage = ina260.readBusVoltage();
 
                     float target_current = load_voltage / target_resistance;
@@ -192,8 +198,11 @@ void loop() {
                     const float m = 1.59404;
 
                     uint16_t new_dac_value = (int)(target_current / m);
-
-                    dac_value = (new_dac_value + dac_value * 4) / 5;
+                   
+                  
+                    dac_value = (new_dac_value + dac_value*4) / 5;
+                    
+                    
 
                     if (dac_value > 4095) {
                         dac_value = 4095;
@@ -205,17 +214,16 @@ void loop() {
 
                 load_power = digital_filter_get_avg(power_filter);
 
-                if (load_power < 800) {
-                    target_resistance = 32.0;
-                } else if (load_power < 2500) {
+            
+                if (load_power < 2500) {
                     target_resistance = 16.0;
-                } else if (load_power <  4000) {
+                } else if (load_power <  6000) {
                     target_resistance = 11.0;
-                } else if (load_power <  7500) {
+                } else if (load_power <  9000) {
                     target_resistance =  7.0;
-                } else if (load_power < 12000) {
+                } else if (load_power < 12500) {
                     target_resistance =  5.5;
-                } else if (load_power < 16000) {
+                } else if (load_power < 14000) {
                     target_resistance =  5.0;
                 } else if (load_power < 24000) {
                     target_resistance =  4.0;
@@ -223,9 +231,9 @@ void loop() {
 
                 break;
             case States::SAFETY:
+                myServo.goalPosition(LA_ID_NUM, feathered_position);
                 if (safety_time + 10000 > millis())
                     break;
-                myServo.goalPosition(LA_ID_NUM, feathered_position);
                 if (safety_switch_closed() && pcc_connected()) {
                     state = States::STARTUP;
                 }
@@ -234,7 +242,7 @@ void loop() {
                 digitalWrite(PCC_RELAY_PIN, HIGH);
 
                 if (!delay_set) {
-                    delay_timer = millis() + 4000;
+                    delay_timer = millis() + 6000;
                     delay_set = true;
                     Serial.println("Powering up t-side...");
                 }
@@ -267,7 +275,7 @@ void loop() {
                     state = States::SAFETY;
                     digitalWrite(PCC_RELAY_PIN, HIGH);
                     if (target_resistance < 5.6) {
-                        last_target_res = target_resistance;
+                        last_target_res = target_resistance + 10;
                     } else {
                         last_target_res = 32.0;
                     }
@@ -275,7 +283,7 @@ void loop() {
                 } else if (digital_filter_get_avg(power_filter) < 10 && ina260.readBusVoltage() < 100) {
                     state = States::STARTUP;
                     last_target_res = 32.0;
-                } else if (rpm_filter_get(rpm_filter) > target_rpm && ina260.readPower() > 10000) {
+                } else if (rpm_filter_get(rpm_filter) > target_rpm && ina260.readPower() > 20000) {
                     state = States::REGULATE;
                 }
 
@@ -291,8 +299,11 @@ void loop() {
                     const float m = 1.59404;
 
                     uint16_t new_dac_value = (int)(target_current / m);
-
-                    dac_value = (new_dac_value + dac_value * 2) / 3;
+                   
+                  
+                    dac_value = (new_dac_value + dac_value) / 2;
+                    
+                    
 
                     if (dac_value > 4095) {
                         dac_value = 4095;
@@ -309,17 +320,18 @@ void loop() {
 
                 if (load_power < 2500) {
                     target_resistance = 16.0;
-                } else if (load_power <  4000) {
+                } else if (load_power <  6000) {
                     target_resistance = 11.0;
-                } else if (load_power <  7500) {
+                } else if (load_power <  9000) {
                     target_resistance =  7.0;
-                } else if (load_power < 13000) {
+                } else if (load_power < 12500) {
                     target_resistance =  5.5;
-                } else if (load_power < 16000) {
+                } else if (load_power < 14000) {
                     target_resistance =  5.0;
                 } else if (load_power < 24000) {
                     target_resistance =  4.0;
                 }
+                 myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     
                 break;
         }
@@ -334,7 +346,7 @@ void loop() {
 
             uint16_t new_dac_value = (int)(target_current / m);
 
-            dac_value = (new_dac_value + dac_value * 2) / 3;
+            dac_value = (new_dac_value + dac_value * 4) / 5;
 
             if (dac_value > 4095) {
                 dac_value = 4095;
