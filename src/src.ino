@@ -65,7 +65,7 @@ unsigned long time_in_state = 0;
 
 // Global State
 int dac_step_size = 2;
-bool print_output = true;
+bool print_output = false;
 bool mppt_enabled = false;
 float last_power = 0;
 bool sweep_dac = false;
@@ -81,10 +81,6 @@ int la_pos;
 
 void setup() {
     Serial.begin(9600);
-    while (!Serial) {
-        // Wait so serial monitor can be opened
-    }
-    Serial.println("Starting up...");
 
     // Saftey Switch
     pinMode(SAFETY_SWITCH_PIN, INPUT);
@@ -110,9 +106,6 @@ void setup() {
     digitalWrite(FAN_PIN, HIGH);
 
     digitalWrite(PCC_RELAY_PIN, LOW);
-
-    Serial.println("Setup finished");
-    Serial.println("Type \"help\" for a list of commands");
 
     // Init timers
     print_timer = millis() + 3000;
@@ -478,6 +471,8 @@ void ProcessCommand(String &serialInput) {
 
         if (cmd == "pcc") {
             digitalWrite(PCC_RELAY_PIN, !digitalRead(PCC_RELAY_PIN));
+        } else if (cmd == "print") {
+            print_output = !print_output;
         } else {
             Serial.println("Invalid subcommand for toggle");
             Serial.println("Try \"help\"");
