@@ -22,8 +22,8 @@ enum States state = States::STARTUP;
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
-const int optimal_pitch = 605;
-const int cut_in_position = 950;
+const int optimal_pitch = 625;
+const int cut_in_position = 1100;
 const int feathered_position = 3200;
 const int target_rpm = 2900;
 
@@ -157,12 +157,10 @@ void loop() {
 
                     int difference = cur_rpm - target_rpm;
 
-                    if (380 <= difference) {
-                        la_pos += 50;
-                    } else if (200 <= difference && difference < 380) {
-                      la_pos += 40;
-                    } else if (80 <= difference && difference < 200) {
-                        la_pos += 20;
+                    if (300 <= difference) {
+                      la_pos += 30;
+                    } else if (80 <= difference && difference < 300) {
+                        la_pos += 15;
                     } else if (35 <= difference && difference < 80) {
                         la_pos += 3;
                     }
@@ -208,12 +206,12 @@ void loop() {
                 load_power = digital_filter_get_avg(power_filter);
 
             
-                if (load_power < 2500) {
+                if (load_power < 5000) {
                     target_resistance = 16.0;
                 } else if (load_power <  6000) {
                     target_resistance = 11.0;
                 } else if (load_power <  9000) {
-                    target_resistance =  7.0;
+                    target_resistance =  8.0;
                 } else if (load_power < 12500) {
                     target_resistance =  5.5;
                 } else if (load_power < 14000) {
@@ -311,12 +309,12 @@ void loop() {
                 if (millis() - time_in_state < 4000)
                     break;
 
-                if (load_power < 2500) {
+                if (load_power < 5000) {
                     target_resistance = 16.0;
                 } else if (load_power <  6000) {
                     target_resistance = 11.0;
                 } else if (load_power <  9000) {
-                    target_resistance =  7.0;
+                    target_resistance =  8.0;
                 } else if (load_power < 12500) {
                     target_resistance =  5.5;
                 } else if (load_power < 14000) {
@@ -473,6 +471,8 @@ void ProcessCommand(String &serialInput) {
             digitalWrite(PCC_RELAY_PIN, !digitalRead(PCC_RELAY_PIN));
         } else if (cmd == "print") {
             print_output = !print_output;
+            if (print_output)
+                print_timer = millis();
         } else {
             Serial.println("Invalid subcommand for toggle");
             Serial.println("Try \"help\"");
