@@ -22,7 +22,7 @@ enum States state = States::STARTUP;
 // Linear Actuator
 PA12 myServo(&Serial1, 16, 1);
 //PA12 linear_actuator = PA12(&Serial1, 16, 1); // possible replace alias for myServo
-const int optimal_pitch = 625;
+const int optimal_pitch = 605;
 const int cut_in_position = 1100;
 const int feathered_position = 3200;
 const int target_rpm = 2900;
@@ -119,7 +119,7 @@ void loop() {
         ProcessCommand(serialInput);
     }
 
-    if (print_timer < millis() && print_output) {
+    if (Serial && print_timer < millis()) {
         print_timer = millis() + print_timer_interval;
         PrintOutput();
     }
@@ -190,10 +190,7 @@ void loop() {
 
                     uint16_t new_dac_value = (int)(target_current / m);
                    
-                  
                     dac_value = (new_dac_value + dac_value*4) / 5;
-                    
-                    
 
                     if (dac_value > 4095) {
                         dac_value = 4095;
@@ -204,7 +201,6 @@ void loop() {
                 }
 
                 load_power = digital_filter_get_avg(power_filter);
-
             
                 if (load_power < 5000) {
                     target_resistance = 16.0;
@@ -256,6 +252,8 @@ void loop() {
                     myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     resistance_tracking_timer = millis();
                     target_resistance = last_target_res;
+                    if (target_resistance > 8.0)
+                        target_resistance = 16.0;
                     state = States::POWER_CURVE;
                     time_in_state = millis();
                 }
@@ -290,12 +288,8 @@ void loop() {
                     const float m = 1.59404;
 
                     uint16_t new_dac_value = (int)(target_current / m);
-                   
-                  
                     dac_value = (new_dac_value + dac_value) / 2;
                     
-                    
-
                     if (dac_value > 4095) {
                         dac_value = 4095;
                     } else if (dac_value < 0) {
@@ -322,7 +316,8 @@ void loop() {
                 } else if (load_power < 24000) {
                     target_resistance =  4.0;
                 }
-                 myServo.goalPosition(LA_ID_NUM, optimal_pitch);
+                
+                myServo.goalPosition(LA_ID_NUM, optimal_pitch);
                     
                 break;
         }
